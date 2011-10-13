@@ -157,7 +157,7 @@ reportFlags <- function ()
         messages <- unlist(lapply(.Workspace$reportrFlags, "[[", "message"))
         
         # This is before the call to report() to avoid infinite recursion
-        .Workspace$reportrFlags <- NULL
+        clearFlags()
         
         for (message in unique(messages))
         {
@@ -169,4 +169,9 @@ reportFlags <- function ()
                 report(level, paste("[x",length(locs),"] ",message,sep=""), prefixFormat="%L: ")
         }
     }
+}
+
+clearFlags <- function ()
+{
+    .Workspace$reportrFlags <- NULL
 }

@@ -7,6 +7,7 @@
 \alias{flag}
 \alias{ask}
 \alias{reportFlags}
+\alias{clearFlags}
 \alias{withReportrHandlers}
 \title{The reportr message reporting system}
 \description{
@@ -21,6 +22,7 @@ flag(level, ...)
 ask(..., default = NULL, prefixFormat = NULL)
 
 reportFlags()
+clearFlags()
 
 withReportrHandlers(expr)
 }
@@ -36,7 +38,7 @@ withReportrHandlers(expr)
   
   The output level is set by the \code{setOutputLevel} function, and governs whether a particular call to \code{report} will actually report anything. Output levels are described by the \code{OL} object, a list with components \code{Debug}, \code{Verbose}, \code{Info}, \code{Warning}, \code{Question} and \code{Error}; and any call to \code{report} using a level lower than the current output level will produce no output. If \code{report} is called before \code{setOutputLevel}, the output level will default to \code{OL$Info} (with a message).
   
-  The \code{flag} function is called like \code{report}, but it stores messages for later reporting, like \code{\link{warning}}, rather than reporting them immediately. Stored messages are reported when \code{report} is next called, at which point multiple instances of the same message are consolidated where possible. The user may also manually force stored messages to be reported by calling \code{reportFlags}. Note that the output level at the time that \code{reportFlags} is called (implicitly or explicitly) will determine whether the flags are printed.
+  The \code{flag} function is called like \code{report}, but it stores messages for later reporting, like \code{\link{warning}}, rather than reporting them immediately. Stored messages are reported when \code{report} is next called, at which point multiple instances of the same message are consolidated where possible. The user may also manually force stored messages to be reported by calling \code{reportFlags}, or remove them with \code{clearFlags}. Note that the output level at the time that \code{reportFlags} is called (implicitly or explicitly) will determine whether the flags are printed.
   
   The \code{ask} function requests input from the user using \code{\link{readline}}, at output level \code{Question}. The text argument then forms the text of the question, and \code{ask} returns the text entered by the user.
   
