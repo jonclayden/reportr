@@ -121,9 +121,12 @@ report <- function (level, ..., prefixFormat = NULL)
     reportFlags()
     cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""), file=stderr())
     
-    if (level == OL$Error)
+    if (outputLevel == OL$Debug)
     {
-        if (outputLevel == OL$Debug)
+        stackTraceLevel <- getOption("reportrStackTraceLevel")
+        if (is.null(stackTraceLevel))
+            stackTraceLevel <- OL$Error
+        if (level >= stackTraceLevel)
         {
             stack <- .getCallStack()
             cat("--- Begin stack trace ---\n", file=stderr())
@@ -131,13 +134,26 @@ report <- function (level, ..., prefixFormat = NULL)
                 cat(rep("* ", i), stack[i], "\n", sep="", file=stderr())
             cat("---  End stack trace  ---\n", file=stderr())
         }
-        
-        invokeRestart("abort")
     }
+    
+    if (level == OL$Error)
+        invokeRestart("abort")
 }
 
 flag <- function (level, ...)
 {
+    if (getOutputLevel() == OL$Debug)
+    {
+        stackTraceLevel <- getOption("reportrStackTraceLevel")
+        if (is.null(stackTraceLevel))
+            stackTraceLevel <- OL$Error
+        if (level >= stackTraceLevel)
+        {
+            report(level, ...)
+            return (invisible(NULL))
+        }
+    }
+    
     message <- .buildMessage(...)
     if (is.null(message))
         return (invisible(NULL))

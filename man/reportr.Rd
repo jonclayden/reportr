@@ -42,7 +42,7 @@ withReportrHandlers(expr)
   
   The \code{ask} function requests input from the user using \code{\link{readline}}, at output level \code{Question}. The text argument then forms the text of the question, and \code{ask} returns the text entered by the user.
   
-  The call \code{report(OL$Error,\dots)} is largely similar to \code{stop(\dots)} in most cases, except that a stack trace will be printed if the current output level is \code{Debug}. The "abort" restart is invoked in any case. No other standard conditions are signalled by \code{report}.
+  The call \code{report(OL$Error,\dots)} is largely similar to \code{stop(\dots)} in most cases, except that a stack trace will be printed if the current output level is \code{Debug}. The "abort" restart is invoked in any case. No other standard conditions are signalled by \code{report}. Stack traces can be generated at lower output levels, if desired, by setting the \code{reportrStackTraceLevel} option.
   
   The \code{withReportrHandlers} function evaluates \code{expr} in a context in which R errors, warnings and messages will be handled by reportr, rather than by the standard R functions.
   
