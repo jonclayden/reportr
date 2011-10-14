@@ -26,7 +26,10 @@ withReportrHandlers <- function (expr)
         flag(OL$Warning, w$message)
         invokeRestart("muffleWarning")
     }, error=function (e) {
-        report(OL$Error, e$message)
+        if (is.null(e$call))
+            report(OL$Error, e$message)
+        else
+            report(OL$Error, e$message, " (in \"", as.character(e$call)[1], "(", implode(as.character(e$call)[-1],", "), ")\")")
     })
 }
 
