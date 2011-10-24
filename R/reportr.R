@@ -29,7 +29,7 @@ withReportrHandlers <- function (expr)
         if (is.null(e$call))
             report(OL$Error, e$message)
         else
-            report(OL$Error, e$message, " (in \"", as.character(e$call)[1], "(", implode(as.character(e$call)[-1],", "), ")\")")
+            report(OL$Error, e$message, " (in \"", as.character(e$call)[1], "(", paste(as.character(e$call)[-1],collapse=", "), ")\")")
     })
 }
 
