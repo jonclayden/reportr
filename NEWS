@@ -2,6 +2,13 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 1.0.1
+
+- Messages are now only printed to stderr() when their level is Warning or
+  higher.
+
+=================================================================================
+
 VERSION 1.0.0
 
 - Errors generated within the expression passed to withReportrHandlers() are now
