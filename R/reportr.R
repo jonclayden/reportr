@@ -122,7 +122,11 @@ report <- function (level, ..., prefixFormat = NULL)
         return (invisible(NULL))
     
     reportFlags()
-    cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""), file=stderr())
+    
+    if (level >= OL$Warning)
+        cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""), file=stderr())
+    else
+        cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""))
     
     if (outputLevel == OL$Debug)
     {
