@@ -84,9 +84,10 @@ withReportrHandlers <- function (expr)
     }
 }
 
-.buildMessage <- function (...)
+.buildMessage <- function (..., round = NULL, signif = NULL)
 {
-    message <- paste(..., sep="")
+    # This assumes that the environment containing relevant variables is the grandparent of the current one
+    message <- s(paste(..., sep=""), round=round, signif=signif, envir=parent.frame(2))
     keep <- TRUE
     
     if (!is.null(getOption("reportrMessageFilterIn")))
