@@ -23,6 +23,16 @@ getOutputLevel <- function ()
         return (getOption("reportrOutputLevel"))
 }
 
+.truncate <- function (strings, maxLength)
+{
+    lengths <- nchar(strings)
+    strings <- substr(strings, 1, maxLength)
+    lines <- strsplit(strings, "\n", fixed=TRUE)
+    strings <- sapply(lines, "[", 1)
+    strings <- paste(strings, ifelse(lengths>maxLength | sapply(lines,length)>1, " ...", ""), sep="")
+    return (strings)
+}
+
 withReportrHandlers <- function (expr)
 {
     withCallingHandlers(expr, message=function (m) {
@@ -35,13 +45,13 @@ withReportrHandlers <- function (expr)
         if (is.null(e$call))
             report(OL$Error, e$message)
         else
-            report(OL$Error, e$message, " (in \"", as.character(e$call)[1], "(", paste(as.character(e$call)[-1],collapse=", "), ")\")")
+            report(OL$Error, e$message, " (in \"", as.character(e$call)[1], "(", .truncate(paste(as.character(e$call)[-1],collapse=", "),100), ")\")")
     })
 }
 
 .getCallStack <- function ()
 {
-    callStrings <- as.character(sys.calls())
+    callStrings <- .truncate(as.character(sys.calls()), 100)
     
     handlerFunLoc <- which(callStrings %~% "^withReportrHandlers\\(")
     if (length(handlerFunLoc) > 0)
@@ -90,9 +100,10 @@ withReportrHandlers <- function (expr)
     }
 }
 
-.buildMessage <- function (...)
+.buildMessage <- function (..., round = NULL, signif = NULL)
 {
-    message <- paste(..., sep="")
+    # This assumes that the environment containing relevant variables is the grandparent of the current one
+    message <- s(paste(..., sep=""), round=round, signif=signif, envir=parent.frame(2))
     keep <- TRUE
     
     if (!is.null(getOption("reportrMessageFilterIn")))

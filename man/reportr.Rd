@@ -28,13 +28,13 @@ withReportrHandlers(expr)
 }
 \arguments{
   \item{level}{The level of output message to produce, or for \code{setOutputLevel}, the minimum level to display. See Details.}
-  \item{\dots}{Objects which can be coerced to mode \code{character}. These will be printed with no space between them.}
+  \item{\dots}{Objects which can be coerced to mode \code{character}. These will be passed through \code{\link{s}} for expression substitution, and then printed with no space between them. Options to \code{\link{s}}, such as \code{round}, may also be given.}
   \item{prefixFormat}{The format of the string prepended to the message. See Details.}
   \item{default}{A default return value, to be used when the message is filtered out or the output level is above \code{OL$Question}.}
   \item{expr}{An expression to be evaluated.}
 }
 \details{
-  The \code{reportr} system for reporting messages provides certain useful features over the standard R system, such as the incorporation of output consolidation, message filtering, automatic generation of stack traces for debugging, and conditional reporting based on the current ``output level''. All output is written to standard error (see \code{\link{stderr}}).
+  The \code{reportr} system for reporting messages provides certain useful features over the standard R system, such as the incorporation of output consolidation, message filtering, expression substitution, automatic generation of stack traces for debugging, and conditional reporting based on the current ``output level''. Messages of \code{Warning} level and above are written to standard error (\code{\link{stderr}}); others are written to standard output (\code{\link{stdout}}).
   
   The output level is set by the \code{setOutputLevel} function, and governs whether a particular call to \code{report} will actually report anything. Output levels are described by the \code{OL} object, a list with components \code{Debug}, \code{Verbose}, \code{Info}, \code{Warning}, \code{Question} and \code{Error}; and any call to \code{report} using a level lower than the current output level will produce no output. If \code{report} is called before \code{setOutputLevel}, the output level will default to \code{OL$Info} (with a message).
   
@@ -54,7 +54,7 @@ withReportrHandlers(expr)
   These functions are mainly called for their side effects, but \code{getOutputLevel} returns the current output level, \code{withReportrHandlers} returns the value of the evaluated expression, and \code{ask} returns a character vector of length one giving the user's response.
 }
 \author{Jon Clayden}
-\seealso{\code{\link{message}}, \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for the normal R message and condition signalling framework.}
+\seealso{\code{\link{s}} for expression substitution (which is performed on messages). \code{\link{message}}, \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for the normal R message and condition signalling framework.}
 \examples{
 setOutputLevel(OL$Warning)
 report(OL$Info, "Test message")  # no output
@@ -65,6 +65,6 @@ flag(OL$Warning, "Test warning")  # no output
 flag(OL$Warning, "Test warning")  # repeated warning
 reportFlags()  # consolidates the warnings and prints the message
 
-name <- ask("What is your name?")
-report(OL$Info, "Hello, ", name)
+\dontrun{name <- ask("What is your name?")
+report(OL$Info, "Hello, #{name}")}
 }

@@ -2,6 +2,16 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 1.1.0
+
+- Expression substitution is now performed on messages, using Ruby-like syntax.
+  This allows R expressions to be interpolated into message strings for brevity
+  and clarity.
+- Error messages and stack trace elements are now truncated to keep output
+  readable.
+
+=================================================================================
+
 VERSION 1.0.1
 
 - Messages are now only printed to stderr() when their level is Warning or

@@ -1,10 +1,10 @@
 Package: reportr
-Version: 1.0.1
-Date: 2013-03-04
+Version: 1.1.0
+Date: 2013-12-04
 Title: A general message and error reporting system
-Author: Jon Clayden <jon.clayden+reportr@gmail.com>
-Maintainer: Jon Clayden <jon.clayden+reportr@gmail.com>
+Author: Jon Clayden
+Maintainer: Jon Clayden <code@clayden.org>
 Depends: R (>= 2.5.0)
-Description: The reportr package provides a system for reporting messages, which provides certain useful features over the standard R system, such as the incorporation of output consolidation, message filtering, automatic generation of stack traces for debugging, and conditional reporting based on the current "output level".
+Description: The reportr package provides a system for reporting messages, which provides certain useful features over the standard R system, such as the incorporation of output consolidation, message filtering, expression substitution, automatic generation of stack traces for debugging, and conditional reporting based on the current "output level".
 LazyLoad: yes
 License: GPL-2
