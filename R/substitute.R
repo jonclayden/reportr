@@ -1,4 +1,4 @@
-s <- function (string, round = NULL, signif = NULL, envir = parent.frame())
+s <- function (strings, round = NULL, signif = NULL, envir = parent.frame())
 {
     if (is.null(round) && is.null(signif) && is.list(getOption("reportrNumericRepresentation")))
     {
@@ -6,23 +6,26 @@ s <- function (string, round = NULL, signif = NULL, envir = parent.frame())
         signif <- getOption("reportrNumericRepresentation")$signif
     }
     
-    while ((match <- regexpr("(?<!\\\\)\\#\\{[^\\}]+\\}", string, perl=TRUE)) != -1)
+    for (i in seq_along(strings))
     {
-        expressionString <- substr(string, match+2, match+attr(match,"match.length")-2)
-        value <- eval(parse(text=expressionString), envir=envir)
-        
-        if (is.double(value))
+        while ((match <- regexpr("(?<!\\\\)\\#\\{[^\\}]+\\}", strings[i], perl=TRUE)) != -1)
         {
-            if (!is.null(round))
-                value <- round(value, round)
-            else if (!is.null(signif))
-                value <- signif(value, signif)
-        }
+            expressionString <- substr(strings[i], match+2, match+attr(match,"match.length")-2)
+            value <- eval(parse(text=expressionString), envir=envir)
         
-        string <- paste(substr(string,1,match-1), as.character(value)[1], substr(string,match+attr(match,"match.length"),nchar(string)), sep="")
+            if (is.double(value))
+            {
+                if (!is.null(round))
+                    value <- round(value, round)
+                else if (!is.null(signif))
+                    value <- signif(value, signif)
+            }
+        
+            strings[i] <- paste(substr(strings[i],1,match-1), as.character(value)[1], substr(strings[i],match+attr(match,"match.length"),nchar(strings[i])), sep="")
+        }
+    
+        strings[i] <- gsub("\\#", "#", strings[i], fixed=TRUE)
     }
     
-    string <- gsub("\\#", "#", string, fixed=TRUE)
-    
-    return (string)
+    return (strings)
 }
