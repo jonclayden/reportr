@@ -2,24 +2,24 @@
 \alias{s}
 \title{Simple expression substitution}
 \description{
-  Evaluate R expressions and substitute their values into a string.
+  Evaluate R expressions and substitute their values into a character vector.
 }
 \usage{
-s(string, round = NULL, signif = NULL, envir = parent.frame())
+s(strings, round = NULL, signif = NULL, envir = parent.frame())
 }
 \arguments{
-  \item{string}{The string to substitute into, containing any number of \code{"#{}"} blocks.}
+  \item{strings}{A character vector containing the strings to substitute into, each containing any number of \code{"#{}"} blocks.}
   \item{round}{\code{NULL} or a single integer, giving the number of decimal digits for rounding numeric expressions. This argument takes priority over \code{signif}.}
   \item{signif}{\code{NULL} or a single integer, giving the number of significant decimal digits to use for numeric expressions. The \code{round} argument takes priority over this one and will be used if not \code{NULL}.}
   \item{envir}{The environment to evaluate expressions in.}
 }
 \details{
-  Each part of the string surrounded by \code{"#{}"} is extracted, evaluated as R code in the specified environment, and then its value is substituted back into the string. The literal string \code{"#{}"} can be obtained by escaping the hash character, viz. \code{"\\\\#{}"}. The block may contain multiple R expressions, separated by semicolons, but may not contain additional braces.
+  Each part of each string surrounded by \code{"#{}"} is extracted, evaluated as R code in the specified environment, and then its value is substituted back into the string. The literal string \code{"#{}"} can be obtained by escaping the hash character, viz. \code{"\\\\#{}"}. The block may contain multiple R expressions, separated by semicolons, but may not contain additional braces.
   
   If the \code{reportrNumericRepresentation} option is defined and is a list, its \code{round} and \code{signif} elements provide defaults for the arguments of the same name.
 }
 \value{
-  The final string, with expressions substituted into it.
+  A character vector containing the final strings, with expressions substituted into them.
 }
 \author{Jon Clayden}
 \seealso{\code{\link{report}}}
