@@ -1,6 +1,10 @@
 .evaluateLevel <- function (level)
 {
-    return (eval(substitute(level,parent.frame()), OL))
+    name <- as.character(substitute(level,parent.frame()))
+    if (length(name) == 1 && name %in% names(OL))
+        return (OL[[name]])
+    else
+        return (level)
 }
 
 setOutputLevel <- function (level)
