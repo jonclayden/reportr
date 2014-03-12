@@ -1,6 +1,6 @@
 Package: reportr
-Version: 1.1.1
-Date: 2014-02-26
+Version: 1.1.2
+Date: 2014-03-10
 Title: A general message and error reporting system
 Author: Jon Clayden
 Maintainer: Jon Clayden <code@clayden.org>

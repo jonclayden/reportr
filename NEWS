@@ -2,6 +2,13 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 1.1.2
+
+- The "level" argument to report() or flag() may now be given without the "OL$"
+  prefix, viz. report(Info, "Test").
+
+=================================================================================
+
 VERSION 1.1.1
 
 - The s() function is now vectorised on its first argument.
