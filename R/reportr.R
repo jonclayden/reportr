@@ -68,7 +68,7 @@ withReportrHandlers <- function (expr)
     if (!is.null(getOption("reportrStackFilterIn")))
         callStrings <- callStrings[callStrings %~% as.character(getOption("reportrStackFilterIn"))[1]]
     if (!is.null(getOption("reportrStackFilterOut")))
-        callStrings <- callStrings[callStrings %!~% as.character(getOption("reportrStackFilterOut"))[1]]
+        callStrings <- callStrings[!(callStrings %~% as.character(getOption("reportrStackFilterOut")))[1]]
     
     return (callStrings)
 }
@@ -107,13 +107,13 @@ withReportrHandlers <- function (expr)
 .buildMessage <- function (..., round = NULL, signif = NULL)
 {
     # This assumes that the environment containing relevant variables is the grandparent of the current one
-    message <- s(paste(..., sep=""), round=round, signif=signif, envir=parent.frame(2))
+    message <- es(paste(..., sep=""), round=round, signif=signif, envir=parent.frame(2))
     keep <- TRUE
     
     if (!is.null(getOption("reportrMessageFilterIn")))
         keep <- keep & (message %~% as.character(getOption("reportrMessageFilterIn"))[1])
     if (!is.null(getOption("reportrMessageFilterOut")))
-        keep <- keep & (message %!~% as.character(getOption("reportrMessageFilterOut"))[1])
+        keep <- keep & (!(message %~% as.character(getOption("reportrMessageFilterOut")))[1])
     
     if (keep)
         return (message)
