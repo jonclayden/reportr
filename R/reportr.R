@@ -145,7 +145,11 @@ report <- function (level, ..., prefixFormat = NULL)
     
     reportFlags()
     
-    if (level >= OL$Warning)
+    stderrLevel <- getOption("reportrStderrLevel")
+    if (is.null(stderrLevel))
+        stderrLevel <- OL$Warning
+    
+    if (level >= stderrLevel)
         cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""), file=stderr())
     else
         cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""))
