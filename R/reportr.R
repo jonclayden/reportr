@@ -59,6 +59,8 @@ withReportrHandlers <- function (expr)
         else
             report(OL$Error, e$message, " (in \"", as.character(e$call)[1], "(", .truncate(paste(as.character(e$call)[-1],collapse=", "),100), ")\")")
     })
+    
+    reportFlags()
 }
 
 .getCallStack <- function ()
