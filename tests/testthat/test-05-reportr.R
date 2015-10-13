@@ -3,8 +3,10 @@ context("Message reporting and output levels")
 test_that("message reporting works", {
     library(ore)
     
-    options(reportrStderrLevel=OL$Error)
+    options(reportrOutputLevel=NULL)
+    options(reportrStderrLevel=OL$Fatal)
     
+    expect_output(getOutputLevel(), "Output level is not set", fixed=TRUE)
     options(reportrOutputLevel=OL$Debug)
     expect_equal(getOutputLevel(), OL$Debug)
     setOutputLevel(OL$Info)
@@ -23,8 +25,16 @@ test_that("message reporting works", {
     expect_output(reportFlags(), "[x2]", fixed=TRUE)
     
     expect_warning(sqrt(-1), "NaNs produced", fixed=TRUE)
-    expect_output({
-        withReportrHandlers(sqrt(-1))
-        reportFlags()
-    }, "NaNs produced", fixed=TRUE)
+    expect_output(withReportrHandlers(sqrt(-1)), "NaNs produced", fixed=TRUE)
+    
+    f <- function() message("Howdy")
+    expect_output(withReportrHandlers(f()), "* INFO: Howdy", fixed=TRUE)
+    
+    setOutputLevel(OL$Debug)
+    options(reportrStackTraceLevel=OL$Info)
+    expect_output(flag(Info,"Converted to report"), "Converted to report", fixed=TRUE)
+    expect_output(withReportrHandlers(f()), "* f()", fixed=TRUE)
+    
+    setOutputLevel(OL$Error)
+    expect_null(ask("This question will not be answered"))
 })
