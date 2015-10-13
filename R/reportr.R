@@ -158,19 +158,21 @@ report <- function (level, ..., prefixFormat = NULL)
     reportFlags()
     
     if (level >= .resolveOption("reportrStderrLevel"))
-        cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""), file=stderr())
+        file <- stderr()
     else
-        cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""))
+        file <- stdout()
+    
+    cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""), file=file)
     
     if (outputLevel == OL$Debug)
     {
         if (level >= .resolveOption("reportrStackTraceLevel"))
         {
             stack <- .getCallStack()
-            cat("--- Begin stack trace ---\n", file=stderr())
+            cat("--- Begin stack trace ---\n", file=file)
             for (i in 1:length(stack))
-                cat(rep("* ", i), stack[i], "\n", sep="", file=stderr())
-            cat("---  End stack trace  ---\n", file=stderr())
+                cat(rep("* ", i), stack[i], "\n", sep="", file=file)
+            cat("---  End stack trace  ---\n", file=file)
         }
     }
     
