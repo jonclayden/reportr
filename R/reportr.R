@@ -18,7 +18,7 @@
 setOutputLevel <- function (level)
 {
     level <- .evaluateLevel(level)
-    if (level %in% OL$Debug:OL$Error)
+    if (level %in% OL$Debug:OL$Fatal)
         options(reportrOutputLevel=level)
     invisible(NULL)
 }
