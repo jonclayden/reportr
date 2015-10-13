@@ -39,7 +39,7 @@ getOutputLevel <- function ()
 {
     lengths <- nchar(strings)
     strings <- substr(strings, 1, maxLength)
-    lines <- strsplit(strings, "\n", fixed=TRUE)
+    lines <- ore.split(ore("\n",syntax="fixed"), strings, simplify=FALSE)
     strings <- sapply(lines, "[", 1)
     strings <- paste(strings, ifelse(lengths>maxLength | sapply(lines,length)>1, " ...", ""), sep="")
     return (strings)
@@ -48,7 +48,7 @@ getOutputLevel <- function ()
 withReportrHandlers <- function (expr)
 {
     withCallingHandlers(expr, message=function (m) {
-        report(OL$Info, sub("\n$","",m$message,perl=TRUE))
+        report(OL$Info, ore.subst("\n$","",m$message))
         invokeRestart("muffleMessage")
     }, warning=function (w) {
         flag(OL$Warning, w$message)
@@ -98,15 +98,15 @@ withReportrHandlers <- function (expr)
             stack <- .getCallStack()
 
         if (prefix %~% "\\%d")
-            prefix <- gsub("%d", paste(rep("* ",length(stack)),collapse=""), prefix, fixed=TRUE)
+            prefix <- ore.subst(ore("%d",syntax="fixed"), paste(rep("* ",length(stack)),collapse=""), prefix, all=TRUE)
         if (prefix %~% "\\%f")
-            prefix <- gsub("%f", sub("^([\\w.]+)\\(.+$","\\1",stack[length(stack)],perl=TRUE), prefix, fixed=TRUE)
+            prefix <- ore.subst(ore("%f",syntax="fixed"), ore.subst("^([\\w.]+)\\(.+$","\\1",stack[length(stack)]), prefix, all=TRUE)
         if (prefix %~% "\\%l")
-            prefix <- gsub("%l", tolower(names(OL)[which(OL==level)]), prefix, fixed=TRUE)
+            prefix <- ore.subst(ore("%l",syntax="fixed"), tolower(names(OL)[which(OL==level)]), prefix, all=TRUE)
         if (prefix %~% "\\%L")
-            prefix <- gsub("%L", toupper(names(OL)[which(OL==level)]), prefix, fixed=TRUE)
+            prefix <- ore.subst(ore("%L",syntax="fixed"), toupper(names(OL)[which(OL==level)]), prefix, all=TRUE)
         if (prefix %~% "\\%p")
-            prefix <- gsub("%p", Sys.getpid(), prefix, fixed=TRUE)
+            prefix <- ore.subst(ore("%p",syntax="fixed"), Sys.getpid(), prefix, all=TRUE)
 
         return (prefix)
     }
