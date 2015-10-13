@@ -1,3 +1,11 @@
+.resolveOption <- function (name)
+{
+    value <- getOption(name)
+    if (is.null(value))
+        value <- .Defaults[[name]]
+    return (value)
+}
+
 .evaluateLevel <- function (level)
 {
     name <- as.character(substitute(level,parent.frame()))
@@ -65,10 +73,12 @@ withReportrHandlers <- function (expr)
     if (length(reportrFunLoc) > 0)
         callStrings <- callStrings[-(reportrFunLoc[length(reportrFunLoc)]:length(callStrings))]
     
-    if (!is.null(getOption("reportrStackFilterIn")))
-        callStrings <- callStrings[callStrings %~% as.character(getOption("reportrStackFilterIn"))[1]]
-    if (!is.null(getOption("reportrStackFilterOut")))
-        callStrings <- callStrings[!(callStrings %~% as.character(getOption("reportrStackFilterOut")))[1]]
+    filterIn <- .resolveOption("reportrStackFilterIn")
+    filterOut <- .resolveOption("reportrStackFilterOut")
+    if (!is.null(filterIn))
+        callStrings <- callStrings[callStrings %~% as.character(filterIn)[1]]
+    if (!is.null(filterOut))
+        callStrings <- callStrings[!(callStrings %~% as.character(filterOut)[1])]
     
     return (callStrings)
 }
@@ -77,10 +87,8 @@ withReportrHandlers <- function (expr)
 {
     if (!is.null(format))
         prefix <- as.character(format)[1]
-    else if (is.null(getOption("reportrPrefixFormat")))
-        prefix <- "%d%L: "
     else
-        prefix <- as.character(getOption("reportrPrefixFormat"))[1]
+        prefix <- as.character(.resolveOption("reportrPrefixFormat"))[1]
     
     if (prefix == "")
         return (prefix)
@@ -110,10 +118,12 @@ withReportrHandlers <- function (expr)
     message <- es(paste(..., sep=""), round=round, signif=signif, envir=parent.frame(2))
     keep <- TRUE
     
-    if (!is.null(getOption("reportrMessageFilterIn")))
-        keep <- keep & (message %~% as.character(getOption("reportrMessageFilterIn"))[1])
-    if (!is.null(getOption("reportrMessageFilterOut")))
-        keep <- keep & (!(message %~% as.character(getOption("reportrMessageFilterOut")))[1])
+    filterIn <- .resolveOption("reportrMessageFilterIn")
+    filterOut <- .resolveOption("reportrMessageFilterOut")
+    if (!is.null(filterIn))
+        keep <- keep & (message %~% as.character(filterIn)[1])
+    if (!is.null(filterOut))
+        keep <- keep & (!(message %~% as.character(filterOut)[1]))
     
     if (keep)
         return (message)
@@ -145,21 +155,14 @@ report <- function (level, ..., prefixFormat = NULL)
     
     reportFlags()
     
-    stderrLevel <- getOption("reportrStderrLevel")
-    if (is.null(stderrLevel))
-        stderrLevel <- OL$Warning
-    
-    if (level >= stderrLevel)
+    if (level >= .resolveOption("reportrStderrLevel"))
         cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""), file=stderr())
     else
         cat(paste(.buildPrefix(level,prefixFormat), message, "\n", sep=""))
     
     if (outputLevel == OL$Debug)
     {
-        stackTraceLevel <- getOption("reportrStackTraceLevel")
-        if (is.null(stackTraceLevel))
-            stackTraceLevel <- OL$Error
-        if (level >= stackTraceLevel)
+        if (level >= .resolveOption("reportrStackTraceLevel"))
         {
             stack <- .getCallStack()
             cat("--- Begin stack trace ---\n", file=stderr())
@@ -178,10 +181,7 @@ flag <- function (level, ...)
     level <- .evaluateLevel(level)
     if (getOutputLevel() == OL$Debug)
     {
-        stackTraceLevel <- getOption("reportrStackTraceLevel")
-        if (is.null(stackTraceLevel))
-            stackTraceLevel <- OL$Error
-        if (level >= stackTraceLevel)
+        if (level >= .resolveOption("reportrStackTraceLevel"))
         {
             report(level, ...)
             return (invisible(NULL))
