@@ -1,6 +1,6 @@
 #' @import ore
 #' @export
-OL <- list(Debug=1, Verbose=2, Info=3, Warning=4, Question=5, Error=6, Fatal=7)
+OL <- list(Debug=1L, Verbose=2L, Info=3L, Warning=4L, Question=5L, Error=6L, Fatal=7L)
 
 .Defaults <- list(reportrOutputLevel=OL$Info,
                   reportrPrefixFormat="%d%L: ",
