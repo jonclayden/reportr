@@ -98,7 +98,7 @@ Note the `#{}` syntax. Everything within the curly braces is evaluated as an R e
 
 ## Message filtering
 
-Sometimes it may be desirable to discard particular messages that would otherwise be reported at the current output level. There are two global options that allow this, `reportrMessageFilterIn` and `reportrMessageFilterOut`, each of which take a Perl-style regular expression. The "in" filter is applied first, keeping only messages that match its regex, and then the "out" filter, which keeps only messages that do not match its regex.
+Sometimes it may be desirable to discard particular messages that would otherwise be reported at the current output level. There are two global options that allow this, `reportrMessageFilterIn` and `reportrMessageFilterOut`, each of which takes a Perl-style regular expression. The "in" filter is applied first, keeping only messages that match its regex, and then the "out" filter, which keeps only messages that do not match its regex.
 
 ```r
 f <- function() {
@@ -132,6 +132,8 @@ withReportrHandlers(g("text"))
 ## * * f(x)
 ## ---  End stack trace  ---
 ```
+
+Notice that the number of asterisks in front of the printed message indicates the depth in the stack of the function reporting the message. This can be useful, in a long stream of output, to determine the structure of the reporting code at a glance. The format of this "prefix" can be customised, however: please see `?report` for details.
 
 ## The `Question` reporting level
 
