@@ -193,9 +193,9 @@ withReportrHandlers <- function (expr)
     if (length(handlerFunLoc) > 0)
         callStrings <- callStrings[-seq_len(handlerFunLoc[length(handlerFunLoc)]+1)]
     
-    reportrFunLoc <- which(callStrings %~% "^(ask|flag|report|reportFlags)\\(")
-    if (length(reportrFunLoc) > 0)
-        callStrings <- callStrings[-(reportrFunLoc[length(reportrFunLoc)]:length(callStrings))]
+    raisingFunLoc <- which(callStrings %~% "^(ask|flag|report|reportFlags|message|warning|stop)\\(")
+    if (length(raisingFunLoc) > 0)
+        callStrings <- callStrings[-(raisingFunLoc[1]:length(callStrings))]
     
     filterIn <- .resolveOption("reportrStackFilterIn")
     filterOut <- .resolveOption("reportrStackFilterOut")
