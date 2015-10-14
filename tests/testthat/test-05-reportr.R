@@ -8,9 +8,9 @@ test_that("message reporting works", {
     
     expect_output(getOutputLevel(), "Output level is not set", fixed=TRUE)
     options(reportrOutputLevel=OL$Debug)
-    expect_equal(getOutputLevel(), OL$Debug)
+    expect_equivalent(getOutputLevel(), OL$Debug)
     setOutputLevel(OL$Info)
-    expect_equal(getOutputLevel(), OL$Info)
+    expect_equivalent(getOutputLevel(), OL$Info)
     
     setOutputLevel(OL$Warning)
     expect_output(report(OL$Info,"Test message"), "", fixed=TRUE)
