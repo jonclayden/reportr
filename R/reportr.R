@@ -264,7 +264,7 @@ ask <- function (..., default = NULL, prefixFormat = NULL)
 {
     outputLevel <- getOutputLevel()
     message <- .buildMessage(...)
-    if (outputLevel > OL$Question || is.null(message))
+    if (!interactive() || outputLevel > OL$Question || is.null(message))
         return (default)
     else
     {
