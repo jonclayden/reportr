@@ -148,10 +148,13 @@ getOutputLevel <- function ()
     {
         setOutputLevel(OL$Info)
         report(OL$Info, "Output level is not set; defaulting to \"Info\"", prefixFormat="")
-        return (OL$Info)
+        level <- OL$Info
     }
     else
-        return (getOption("reportrOutputLevel"))
+        level <- getOption("reportrOutputLevel")
+    
+    names(level) <- names(which(OL == level))
+    return (level)
 }
 
 .truncate <- function (strings, maxLength)
