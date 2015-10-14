@@ -168,7 +168,7 @@ getOutputLevel <- function ()
 #' @export
 withReportrHandlers <- function (expr)
 {
-    withCallingHandlers(expr, message=function (m) {
+    result <- withCallingHandlers(expr, message=function (m) {
         report(OL$Info, ore.subst("\n$","",m$message))
         invokeRestart("muffleMessage")
     }, warning=function (w) {
@@ -182,6 +182,7 @@ withReportrHandlers <- function (expr)
     })
     
     reportFlags()
+    return (result)
 }
 
 .getCallStack <- function ()
