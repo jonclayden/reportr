@@ -2,6 +2,24 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 1.2.0
+
+- The "ore" package is now used by "reportr". It provides improved versions of
+  some of the package's auxiliary functionality. As a result, the s() function
+  and %~% and %!~% operators are no longer exported by "reportr". Please see
+  es(), %~% and %~~% from "ore" instead.
+- It is now possible to configure the level at which the stderr stream is used,
+  using the "reportrStderrLevel" option.
+- A "Fatal" output level has been added. In practice it is never used, but the
+  output level can be set to it, to suppress all output.
+- Flags are now reported at the end of a call to withReportrHandlers().
+- The ask() function now also returns the default value if the R session is
+  noninteractive.
+- The return value from getOutputLevel() is now named with the level name.
+- A set of tests, and a README file, have been added to the package.
+
+=================================================================================
+
 VERSION 1.1.2
 
 - The "level" argument to report() or flag() may now be given without the "OL$"
