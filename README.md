@@ -4,6 +4,16 @@ The `reportr` package for R is a simple alternative to R's standard functions fo
 
 Further alternatives in this area include the [`futile.logger`](https://cran.r-project.org/web/packages/futile.logger/), [`log4r`](https://cran.r-project.org/web/packages/log4r/index.html) and [`logging`](https://cran.r-project.org/web/packages/logging/) packages.
 
+## Contents
+
+- [Usage](#usage)
+- [Using `reportr` to handle standard messages](#using-reportr-to-handle-standard-messages)
+- [Output consolidation](#output-consolidation)
+- [Expression substitution](#expression-substitution)
+- [Message filtering](#message-filtering)
+- [Stack tracing](#stack-tracing)
+- [The `Question` reporting level](#the-question-reporting-level)
+
 ## Usage
 
 The key functions in the package are `report()` and `flag()`. Both take a reporting level as their first argument, which determines the priority of the message. The functions differ only in that `report()` reports the message to the console immediately, whereas `flag()`, like `warning()`, saves it for reporting later. Flagged messages are reported at the next `report()` call, to keep output in order.
