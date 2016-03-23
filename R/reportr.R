@@ -233,7 +233,7 @@ withReportrHandlers <- function (expr)
         if (prefix %~% "\\%L")
             prefix <- ore.subst(ore("%L",syntax="fixed"), toupper(names(OL)[which(OL==level)]), prefix, all=TRUE)
         if (prefix %~% "\\%p")
-            prefix <- ore.subst(ore("%p",syntax="fixed"), Sys.getpid(), prefix, all=TRUE)
+            prefix <- ore.subst(ore("%p",syntax="fixed"), as.character(Sys.getpid()), prefix, all=TRUE)
 
         return (prefix)
     }
