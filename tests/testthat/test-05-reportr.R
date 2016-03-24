@@ -13,7 +13,7 @@ test_that("message reporting works", {
     expect_equivalent(getOutputLevel(), OL$Info)
     
     setOutputLevel(OL$Warning)
-    expect_output(report(OL$Info,"Test message"), "", fixed=TRUE)
+    expect_silent(report(OL$Info,"Test message"))
     
     setOutputLevel(OL$Info)
     expect_output(report(OL$Info,"Test message"), "Test message", fixed=TRUE)
