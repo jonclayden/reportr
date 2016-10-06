@@ -280,8 +280,11 @@ report <- function (level, ..., prefixFormat = NULL)
 {
     level <- .evaluateLevel(level)
     outputLevel <- getOutputLevel()
+    if (outputLevel > level)
+        return (invisible(NULL))
+    
     message <- .buildMessage(...)
-    if (outputLevel > level || is.null(message))
+    if (is.null(message))
         return (invisible(NULL))
     
     reportFlags()
