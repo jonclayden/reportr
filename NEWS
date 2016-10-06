@@ -2,6 +2,14 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 1.2.2
+
+- The report() function now checks whether the output level is low enough for
+  the message to be displayed, before constructing it. This can save a lot of
+  overhead time when many debug-type messages are to be skipped over.
+
+=================================================================================
+
 VERSION 1.2.1
 
 - Use of the "%p" syntax in a prefix format string previously caused an error.
