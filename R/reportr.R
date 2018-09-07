@@ -82,6 +82,9 @@
 #'   Details.
 #' @param default A default return value, to be used when the message is
 #'   filtered out or the output level is above \code{Question}.
+#' @param valid For \code{ask}, a character vector of valid responses. If
+#'   necessary, the question will be asked repeatedly until the user gives a
+#'   suitable response. (Matching is not case-sensitive.)
 #' @param expr An expression to be evaluated.
 #' 
 #' @return These functions are mainly called for their side effects, but
@@ -260,7 +263,7 @@ withReportrHandlers <- function (expr)
 
 #' @rdname reportr
 #' @export
-ask <- function (..., default = NULL, prefixFormat = NULL)
+ask <- function (..., default = NULL, valid = NULL, prefixFormat = NULL)
 {
     outputLevel <- getOutputLevel()
     message <- .buildMessage(...)
@@ -269,8 +272,18 @@ ask <- function (..., default = NULL, prefixFormat = NULL)
     else
     {
         reportFlags()
-        ans <- readline(paste(.buildPrefix(OL$Question,prefixFormat), message, " ", sep=""))
-        return (ans)
+        repeat
+        {
+            ans <- readline(paste(.buildPrefix(OL$Question,prefixFormat), message, " ", sep=""))
+            if (is.null(valid))
+                return (ans)
+            else
+            {
+                match <- (tolower(ans) == tolower(valid))
+                if (any(match))
+                    return (valid[which(match)[1]])
+            }
+        }
     }
 }
 
