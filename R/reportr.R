@@ -37,6 +37,10 @@
 #' then forms the text of the question, and \code{ask} returns the text
 #' entered by the user.
 #' 
+#' The \code{assert} function asserts that its first argument evaluates to
+#' \code{TRUE}, and prints an error message if not (or warning, etc., according
+#' to the specified output level for the message).
+#' 
 #' The call \code{report(Error,\dots)} is largely similar to \code{stop(\dots)}
 #' in most cases, except that a stack trace will be printed if the current
 #' output level is \code{Debug}. The "abort" restart is invoked in any case. No
@@ -86,6 +90,8 @@
 #'   necessary, the question will be asked repeatedly until the user gives a
 #'   suitable response. (Matching is not case-sensitive.)
 #' @param expr An expression to be evaluated.
+#' @param envir For \code{assert}, the environment in which to evaluate the
+#'   specified expression.
 #' 
 #' @return These functions are mainly called for their side effects, but
 #'   \code{getOutputLevel} returns the current output level,
@@ -379,4 +385,17 @@ reportFlags <- function ()
 clearFlags <- function ()
 {
     .Workspace$reportrFlags <- NULL
+}
+
+#' @rdname reportr
+#' @export
+assert <- function (expr, ..., level = OL$Error, prefixFormat = NULL, envir = parent.frame())
+{
+    result <- try(as.logical(eval(substitute(expr), envir)), silent=TRUE)
+    if (!isTRUE(result))
+    {
+        level <- .evaluateLevel(level)
+        message <- .buildMessage(...)
+        report(level, message)
+    }
 }
