@@ -1,10 +1,9 @@
-context("Message reporting and output levels")
+context("Message reporting")
 
 test_that("message reporting works", {
     library(ore)
     
-    options(reportrOutputLevel=NULL)
-    options(reportrStderrLevel=OL$Fatal)
+    options(reportrOutputLevel=NULL, reportrStderrLevel=OL$Fatal)
     
     expect_output(getOutputLevel(), "Output level is not set", fixed=TRUE)
     options(reportrOutputLevel=OL$Debug)
@@ -35,6 +34,8 @@ test_that("message reporting works", {
     expect_output(flag(Info,"Converted to report"), "Converted to report", fixed=TRUE)
     expect_output(withReportrHandlers(f()), "* f()", fixed=TRUE)
     
-    setOutputLevel(OL$Error)
-    expect_null(ask("This question will not be answered"))
+    setOutputLevel(OL$Info)
+    options(reportrMessageFilterOut="^T")
+    expect_null(report(OL$Info, "Test message"))
+    options(reportrMessageFilterOut=NULL)
 })
