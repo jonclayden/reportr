@@ -267,20 +267,24 @@ withReportrHandlers <- function (expr)
         return (NULL)
 }
 
+# Simple wrappers, to facilitate mocking in the tests
+.interactive <- function() base::interactive()
+.readline <- function(...) base::readline(...)
+
 #' @rdname reportr
 #' @export
 ask <- function (..., default = NULL, valid = NULL, prefixFormat = NULL)
 {
     outputLevel <- getOutputLevel()
     message <- .buildMessage(...)
-    if (!interactive() || outputLevel > OL$Question || is.null(message))
+    if (!.interactive() || outputLevel > OL$Question || is.null(message))
         return (default)
     else
     {
         reportFlags()
         repeat
         {
-            ans <- readline(paste(.buildPrefix(OL$Question,prefixFormat), message, " ", sep=""))
+            ans <- .readline(paste(.buildPrefix(OL$Question,prefixFormat), message, " ", sep=""))
             if (is.null(valid))
                 return (ans)
             else
