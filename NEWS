@@ -2,6 +2,16 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 1.3.0
+
+- The new assert() function reports a message (by default an error) if its first
+  argument produces an error or does not evaluate TRUE.
+- The ask() function gains a "valid" argument, which specifies valid responses.
+  If it is given, the user will be asked repeatedly until they give a suitable
+  answer.
+
+=================================================================================
+
 VERSION 1.2.2
 
 - The report() function now checks whether the output level is low enough for
