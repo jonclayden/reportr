@@ -5,7 +5,7 @@ Title: A General Message and Error Reporting System
 Author: Jon Clayden
 Maintainer: Jon Clayden <code@clayden.org>
 Imports: ore
-Suggests: testthat (>= 0.11.0), covr
+Suggests: tinytest, covr
 Description: Provides a system for reporting messages, which provides certain useful features over the standard R system, such as the incorporation of output consolidation, message filtering, assertions, expression substitution, automatic generation of stack traces for debugging, and conditional reporting based on the current "output level".
 Encoding: UTF-8
 License: GPL-2
