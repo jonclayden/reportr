@@ -1,4 +1,5 @@
 setOutputLevel(OL$Info)
+
 expect_null(assert(1 == 1, "Arithmetic failure"))
 expect_stdout(assert(NA == NA, "NAs don't test equal to themselves", level=OL$Info), "NAs don't test equal to themselves")
 # The case below produces an error

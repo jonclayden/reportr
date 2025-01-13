@@ -268,8 +268,8 @@ withReportrHandlers <- function (expr)
 }
 
 # Simple wrappers, to facilitate mocking in the tests
-.interactive <- function() base::interactive()
-.readline <- function(...) base::readline(...)
+.interactive <- function() base::interactive()      # nocov
+.readline <- function(...) base::readline(...)      # nocov
 
 #' @rdname reportr
 #' @export
