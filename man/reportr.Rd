@@ -40,10 +40,10 @@ assert(expr, ..., level = OL$Error, prefixFormat = NULL,
 \item{expr}{An expression to be evaluated.}
 
 \item{\dots}{Objects which can be coerced to mode \code{character}. These
-will be passed through function \code{\link{es}} (from the \code{ore}
+will be passed through function \code{\link[ore]{es}} (from the \code{ore}
 package) for expression substitution, and then printed with no space
-between them. Options to \code{\link{es}}, such as \code{round}, may also
-be given.}
+between them. Options to \code{\link[ore]{es}}, such as \code{round}, may
+also be given.}
 
 \item{default}{A default return value, to be used when the message is
 filtered out or the output level is above \code{Question}.}
@@ -157,7 +157,7 @@ report(OL$Info, "Hello, #{name}")}
 
 }
 \seealso{
-\code{\link{es}} (in package \code{ore}) for expression
+\code{\link[ore]{es}} (in package \code{ore}) for expression
   substitution (which is performed on messages). \code{\link{message}},
   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
   the normal R message and condition signalling framework.

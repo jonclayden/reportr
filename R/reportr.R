@@ -78,10 +78,10 @@
 #' @param level The level of output message to produce, or for
 #'   \code{setOutputLevel}, the minimum level to display. See Details.
 #' @param \dots Objects which can be coerced to mode \code{character}. These
-#'   will be passed through function \code{\link{es}} (from the \code{ore}
+#'   will be passed through function \code{\link[ore]{es}} (from the \code{ore}
 #'   package) for expression substitution, and then printed with no space
-#'   between them. Options to \code{\link{es}}, such as \code{round}, may also
-#'   be given.
+#'   between them. Options to \code{\link[ore]{es}}, such as \code{round}, may
+#'   also be given.
 #' @param prefixFormat The format of the string prepended to the message. See
 #'   Details.
 #' @param default A default return value, to be used when the message is
@@ -112,7 +112,7 @@
 #' \dontrun{name <- ask("What is your name?")
 #' report(OL$Info, "Hello, #{name}")}
 #' 
-#' @seealso \code{\link{es}} (in package \code{ore}) for expression
+#' @seealso \code{\link[ore]{es}} (in package \code{ore}) for expression
 #'   substitution (which is performed on messages). \code{\link{message}},
 #'   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
 #'   the normal R message and condition signalling framework.
