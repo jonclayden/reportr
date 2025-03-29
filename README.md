@@ -1,3 +1,5 @@
+[![CRAN version](http://www.r-pkg.org/badges/version/reportr)](https://cran.r-project.org/package=reportr) [![CI](https://github.com/jonclayden/reportr/actions/workflows/ci.yaml/badge.svg)](https://github.com/jonclayden/reportr/actions/workflows/ci.yaml) [![codecov](https://codecov.io/gh/jonclayden/reportr/graph/badge.svg?token=WAGDWQjJRM)](https://codecov.io/gh/jonclayden/reportr)
+
 # reportr: Message reporting for R
 
 The `reportr` package for R is a simple alternative to R's standard functions for producing informative output, such as `message()`, `warning()` and `stop()`. It offers a certain amount more flexibility than these functions, although it is not (yet) a full logging solution. The package is available on CRAN.
