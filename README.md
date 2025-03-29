@@ -1,4 +1,4 @@
-[![CRAN version](http://www.r-pkg.org/badges/version/reportr)](https://cran.r-project.org/package=reportr) [![CI](https://github.com/jonclayden/reportr/actions/workflows/ci.yaml/badge.svg)](https://github.com/jonclayden/reportr/actions/workflows/ci.yaml) [![codecov](https://codecov.io/gh/jonclayden/reportr/graph/badge.svg?token=WAGDWQjJRM)](https://codecov.io/gh/jonclayden/reportr)
+[![CRAN version](http://www.r-pkg.org/badges/version/reportr)](https://cran.r-project.org/package=reportr) [![CI](https://github.com/jonclayden/reportr/actions/workflows/ci.yaml/badge.svg)](https://github.com/jonclayden/reportr/actions/workflows/ci.yaml) [![codecov](https://codecov.io/gh/jonclayden/reportr/graph/badge.svg?token=WAGDWQjJRM)](https://app.codecov.io/gh/jonclayden/reportr)
 
 # reportr: Message reporting for R
 
