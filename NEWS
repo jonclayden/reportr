@@ -2,6 +2,14 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 1.3.1
+
+- Tests have been moved from "testthat" to "tinytest".
+- Package anchors have been added to documentation references to ore::es(), as
+  now required for CRAN.
+
+=================================================================================
+
 VERSION 1.3.0
 
 - The new assert() function reports a message (by default an error) if its first
