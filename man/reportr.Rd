@@ -5,7 +5,6 @@
 \alias{OL}
 \alias{setOutputLevel}
 \alias{getOutputLevel}
-\alias{withReportrHandlers}
 \alias{ask}
 \alias{report}
 \alias{flag}
@@ -17,8 +16,6 @@
 setOutputLevel(level)
 
 getOutputLevel()
-
-withReportrHandlers(expr)
 
 ask(..., default = NULL, valid = NULL, prefixFormat = NULL)
 
@@ -37,8 +34,6 @@ assert(expr, ..., level = OL$Error, prefixFormat = NULL,
 \item{level}{The level of output message to produce, or for
 \code{setOutputLevel}, the minimum level to display. See Details.}
 
-\item{expr}{An expression to be evaluated.}
-
 \item{\dots}{Objects which can be coerced to mode \code{character}. These
 will be passed through function \code{\link[ore]{es}} (from the \code{ore}
 package) for expression substitution, and then printed with no space
@@ -54,6 +49,8 @@ suitable response. (Matching is not case-sensitive.)}
 
 \item{prefixFormat}{The format of the string prepended to the message. See
 Details.}
+
+\item{expr}{An expression to be evaluated.}
 
 \item{envir}{For \code{assert}, the environment in which to evaluate the
 specified expression.}
@@ -108,16 +105,27 @@ The \code{assert} function asserts that its first argument evaluates to
 \code{TRUE}, and prints an error message if not (or warning, etc., according
 to the specified output level for the message).
 
-The call \code{report(Error,\dots)} is largely similar to \code{stop(\dots)}
-in most cases, except that a stack trace will be printed if the current
-output level is \code{Debug}. The "abort" restart is invoked in any case. No
-other standard conditions are signalled by \code{report}. Stack traces can
-be generated at lower output levels, if desired, by setting the
-\code{reportrStackTraceLevel} option.
+Every message is signalled as an R condition before it is reported, so that
+calling code can intercept it. The condition's class vector always includes
+one derived from the level of the message, such as \code{"reportrInfo"}, so
+\code{tryCatch(expr, reportrInfo=...)} will match. See
+\code{\link{reportrCondition}} for the structure of these objects, and
+\code{\link{signal}} for attaching more meaningful classes of your own.
+
+The call \code{report(Error,\dots)} is similar to \code{stop(\dots)}, except
+that the message is formatted by reportr rather than by R, and a stack trace
+will be printed if the current output level is \code{Debug} and the level of
+the message is at least \code{reportrStackTraceLevel}. Since the condition is
+signalled before the message is reported, such errors can be caught with
+\code{\link{try}} or \code{tryCatch(expr, error=...)} in the usual way. If
+nothing handles the condition the "abort" restart is invoked, which ends
+execution without R adding a second message of its own. An error is fatal
+whatever the current output level, and whether or not its message is
+filtered out of the output.
 
 The \code{withReportrHandlers} function evaluates \code{expr} in a context
 in which R errors, warnings and messages will be handled by reportr, rather
-than by the standard R functions.
+than by the standard R functions. See \code{\link{handlers}}.
 
 The \code{prefixFormat} argument to \code{report} and \code{ask} controls
 how the output message is formatted. It takes the form of a
@@ -126,10 +134,14 @@ percent-escapes. Specifically, \code{"\%d"} expands to a series of stars
 indicating the current stack depth; \code{"\%f"} gives the name of the
 function calling \code{report} or \code{ask}; \code{"\%l"} and \code{"\%L"}
 give lower and upper case versions of the level of the message,
-respectively; and \code{"\%p"} expands to the ID of the current R process
-(see \code{\link{Sys.getpid}}). The default is \code{"\%d\%L: "}, giving a
-prefix such as \code{"* * INFO: "}, but this default can be overridden by
-setting the \code{reportrPrefixFormat} option.
+respectively; \code{"\%p"} expands to the ID of the current R process (see
+\code{\link{Sys.getpid}}); and \code{"\%t"} expands to the current time,
+formatted according to the \code{reportrTimeFormat} option. The default is
+\code{"\%d\%L: "}, giving a prefix such as \code{"* * INFO: "}, but this
+default can be overridden by setting the \code{reportrPrefixFormat} option.
+
+Messages are written to one or more destinations, which may include files as
+well as the terminal. See \code{\link{destinations}}.
 
 A number of other options influence the output produced by reportr.
 \code{getOutputLevel} and \code{setOutputLevel} get and set the
@@ -138,9 +150,11 @@ The options \code{reportrMessageFilterIn} and \code{reportrMessageFilterOut}
 can contain a single character string representing a Perl regular
 expression, in which case only messages which match
 (\code{reportrMessageFilterIn}) or do not match
-(\code{reportrMessageFilterOut}) the regular expression will be retained.
-Likewise, the \code{reportrStackFilterIn} and \code{reportrStackFilterOut}
-options filter the call stack.
+(\code{reportrMessageFilterOut}) the regular expression will be reported.
+Filtering affects only what is reported: the corresponding condition is
+signalled either way. The \code{reportrBaseClasses} option controls whether
+reportr conditions also inherit from R's own \code{"message"} and
+\code{"warning"} classes; see \code{\link{reportrCondition}}.
 }
 \examples{
 setOutputLevel(OL$Warning)
@@ -157,8 +171,12 @@ report(OL$Info, "Hello, #{name}")}
 
 }
 \seealso{
-\code{\link[ore]{es}} (in package \code{ore}) for expression
-  substitution (which is performed on messages). \code{\link{message}},
+\code{\link{signal}} for attaching classes to messages, so that
+  callers can decide how serious they are; \code{\link{handlers}} for acting
+  on them; \code{\link{reportrCondition}} for the condition objects
+  themselves; and \code{\link{destinations}} for controlling where output
+  goes. \code{\link[ore]{es}} (in package \code{ore}) performs the
+  expression substitution applied to messages. \code{\link{message}},
   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
   the normal R message and condition signalling framework.
 }

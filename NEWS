@@ -2,6 +2,66 @@ Significant changes to the reportr package are laid out below for each release.
 
 =================================================================================
 
+VERSION 2.0.0
+
+- Every message is now signalled as a classed R condition before it is
+  reported. The class vector always includes one derived from the level of the
+  message, such as "reportrInfo", so existing code gains conditions without
+  any changes. See ?reportrCondition.
+- The new signal() function, and its per-level variants signalDebug(),
+  signalVerbose(), signalInfo(), signalWarning() and signalError(), attach
+  further classes of the caller's choosing to a message.
+- The new reportAs() function changes the level at which particular classes of
+  condition are reported, so that the caller decides how serious a situation
+  is. Together these replace the common pattern of a function taking an
+  "errorIfMissing"-style logical argument to be told how to react to something
+  it has detected.
+- withReportrHandlers() now also accepts named arguments mapping condition
+  classes to levels or to handler functions, and reportrHandlers() installs the
+  same translations for a whole session using globalCallingHandlers().
+- Messages can now be sent to files, connections and functions as well as, or
+  instead of, the terminal. See ?destinations. The new "%t" prefix escape
+  expands to the current time.
+- The new level OL$Ignore, below OL$Debug, can be used with reportAs() to
+  suppress a class of condition entirely.
+
+BREAKING CHANGES
+
+- Errors raised by report() and friends are now caught by try() and by
+  tryCatch(expr, error=...), since the conditions signalled inherit from
+  "error". Previously they could not be caught at all. Code which wrapped a
+  reporting function in try() to guard against other errors may now find it
+  catching reportr errors as well.
+- An error is now fatal whatever the current output level, and whether or not
+  its message is filtered out of the output. Previously either could prevent
+  it from taking effect.
+- OL$Fatal now ends execution in the same way as OL$Error. Previously it was
+  reported but not acted upon.
+- The reportrStackFilterIn and reportrStackFilterOut options have been removed.
+- An assertion whose expression itself reports an error is now a failed
+  assertion, and reports the message given to assert(), rather than ending
+  execution. This matches what already happened when the expression raised an
+  error in R's own way.
+- flag() signals its condition at the point where the message is flagged,
+  rather than when it is eventually reported. A flagged message at level Error
+  or above is therefore fatal at that point.
+
+BUG FIXES
+
+- Expression substitution is no longer applied twice to consolidated messages
+  reported by reportFlags(), or to messages passed to assert(). Text containing
+  "#{...}" is now reported literally in these cases, as intended.
+- Message text arriving from outside reportr, via withReportrHandlers(), is no
+  longer passed through es(). Previously a foreign message containing the
+  "#{...}" syntax would have it evaluated.
+- The environment used for expression substitution is now passed explicitly
+  rather than being inferred from the call depth, so it remains correct
+  regardless of how a message reaches the reporting code.
+- assert() now honours its "prefixFormat" argument, which it previously
+  accepted and ignored.
+
+=================================================================================
+
 VERSION 1.3.1
 
 - Tests have been moved from "testthat" to "tinytest".

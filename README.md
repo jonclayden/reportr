@@ -9,10 +9,13 @@ Further alternatives in this area include the [`futile.logger`](https://cran.r-p
 ## Contents
 
 - [Usage](#usage)
+- [Conditions](#conditions)
+- [Letting the caller decide](#letting-the-caller-decide)
 - [Using `reportr` to handle standard messages](#using-reportr-to-handle-standard-messages)
 - [Output consolidation](#output-consolidation)
 - [Expression substitution](#expression-substitution)
 - [Message filtering](#message-filtering)
+- [Reporting to files](#reporting-to-files)
 - [Stack tracing](#stack-tracing)
 - [The `Question` reporting level](#the-question-reporting-level)
 
@@ -31,7 +34,53 @@ report(Info, "Test message")
 ## INFO: Test message
 ```
 
-The reporting levels available, in ascending order of priority, are currently `Debug`, `Verbose`, `Info`, `Warning`, `Question`, `Error` and `Fatal`. The `Error` level raises R's "abort" condition, like `stop()`, so execution will stop. The `Fatal` level is in practice never used, but can be set as the output level to subdue all reporting.
+The reporting levels available, in ascending order of priority, are currently `Debug`, `Verbose`, `Info`, `Warning`, `Question`, `Error` and `Fatal`. The `Error` and `Fatal` levels stop execution, like `stop()`. There is also an `Ignore` level, below `Debug`, which is used to suppress messages entirely (see below).
+
+## Conditions
+
+Every message is signalled as an R condition before it is reported, so calling code can intercept it. The condition's class vector always includes one derived from the level of the message, so errors behave like any other R error:
+
+```r
+tryCatch(report(Error, "Something broke"), error = function(e) conditionMessage(e))
+## [1] "Something broke"
+```
+
+Unlike `stop()`, though, reportr formats the message itself and does not let R print a second one. If nothing handles the condition, execution simply ends.
+
+## Letting the caller decide
+
+Often a function cannot know how serious a problem is: a missing file may be fatal in one context and unremarkable in another. The usual workaround is a logical argument such as `errorIfMissing`, but that puts the decision in the wrong place and has to be threaded through every intervening layer.
+
+Instead, the function can describe what happened and attach a class to it, using `signalWarning()` or one of its siblings:
+
+```r
+findThing <- function (name) {
+    if (name != "widget")
+        return(signalWarning("There is no #{name}", class="missingThing", default=NA))
+    return("the widget")
+}
+```
+
+Callers who do nothing get the message reported as a warning, and `NA` back:
+
+```r
+findThing("sprocket")
+## WARNING: There is no sprocket
+## [1] NA
+```
+
+Callers who care use `reportAs()` to say how serious it is for them:
+
+```r
+reportAs(findThing("sprocket"), missingThing=Error)
+## ERROR: There is no sprocket
+## (execution stops)
+
+reportAs(findThing("sprocket"), missingThing=Ignore)
+## [1] NA
+```
+
+The `default` argument gives the value returned if nothing intervenes. Supplying it, even as `NULL`, also marks the condition recoverable, which is what allows an `Error` to be demoted to a lower level: code which signalled an error was generally not written to carry on afterwards, so reportr will not resume it unless the signaller said what value to continue with.
 
 ## Using `reportr` to handle standard messages
 
@@ -128,6 +177,25 @@ options(reportrMessageFilterIn=NULL, reportrMessageFilterOut="^T")
 f()
 ## * INFO: One
 ```
+
+Filtering affects only what is reported; the corresponding condition is signalled either way, and a filtered error is still fatal.
+
+## Reporting to files
+
+Output goes to one or more destinations. By default there is just one, named `"terminal"`, which writes to standard output or standard error as before. Others can be added, each with its own level threshold and prefix format.
+
+```r
+setOutputLevel(Debug)
+addReportDestination("run.log", prefixFormat="%t %L: ")
+```
+
+Everything now goes to `run.log` with a timestamp, as well as to the terminal. Removing the terminal destination sends output to the log file alone:
+
+```r
+removeReportDestination("terminal")
+```
+
+A destination may also be a connection, or a function taking the formatted text, the level and the condition object. `clearReportDestinations()` restores the default.
 
 ## Stack tracing
 
