@@ -80,11 +80,11 @@ of option \code{reportrStderrLevel} are written to standard error
 The output level is set by the \code{setOutputLevel} function, and governs
 whether a particular call to \code{report} will actually report anything.
 Output levels are described by the \code{OL} object, a list with components
-\code{Debug}, \code{Verbose}, \code{Info}, \code{Warning}, \code{Question},
-\code{Error} and \code{Fatal}. Any call to \code{report} using a level lower
-than the current output level will produce no output. If \code{report} is
-called before \code{setOutputLevel}, the output level will default to
-\code{Info} (with a message).
+\code{Ignore}, \code{Debug}, \code{Verbose}, \code{Info}, \code{Warning},
+\code{Question}, \code{Error} and \code{Fatal}. Any call to \code{report}
+using a level lower than the current output level will produce no output.
+If \code{report} is called before \code{setOutputLevel}, the output level
+will default to \code{Info} (with a message).
 
 The \code{flag} function is called like \code{report}, but it stores
 messages for later reporting, like \code{\link{warning}}, rather than
@@ -98,8 +98,8 @@ whether the flags are printed.
 
 The \code{ask} function requests input from the user, using
 \code{\link{readline}}, at output level \code{Question}. The text argument
-then forms the text of the question, and \code{ask} returns the text
-entered by the user.
+forms the text of the question, and \code{ask} returns the text entered by
+the user.
 
 The \code{assert} function asserts that its first argument evaluates to
 \code{TRUE}, and prints an error message if not (or warning, etc., according
@@ -115,8 +115,8 @@ one derived from the level of the message, such as \code{"reportrInfo"}, so
 The call \code{report(Error,\dots)} is similar to \code{stop(\dots)}, except
 that the message is formatted by reportr rather than by R, and a stack trace
 will be printed if the current output level is \code{Debug} and the level of
-the message is at least \code{reportrStackTraceLevel}. Since the condition is
-signalled before the message is reported, such errors can be caught with
+the message is at least \code{reportrStackTraceLevel}. Since the condition
+is signalled before the message is reported, such errors can be caught with
 \code{\link{try}} or \code{tryCatch(expr, error=...)} in the usual way. If
 nothing handles the condition the "abort" restart is invoked, which ends
 execution without R adding a second message of its own. An error is fatal
@@ -178,7 +178,7 @@ report(OL$Info, "Hello, #{name}")}
   goes. \code{\link[ore]{es}} (in package \code{ore}) performs the
   expression substitution applied to messages. \code{\link{message}},
   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
-  the normal R message and condition signalling framework.
+  the normal R message and condition-signalling framework.
 }
 \author{
 Jon Clayden

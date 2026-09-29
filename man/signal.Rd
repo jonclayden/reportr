@@ -51,8 +51,8 @@ of the function which is signalling.}
 }
 \value{
 The value of \code{default}, or a value supplied by a handler
-  through the \code{useValue} restart, invisibly. \code{signalError} does not
-  return unless a handler recovers from it.
+  through the \code{useValue} restart, invisibly. \code{signalError} does
+  not return unless a handler recovers from it.
 }
 \description{
 These functions report a message, exactly as \code{\link{report}} does, but
@@ -63,17 +63,13 @@ rather than the function which detects it having to be told in advance.
 \details{
 A function which cannot do what was asked of it has to decide whether that
 is an error. Often only the caller knows: a missing file may be fatal in one
-context and unremarkable in another. The usual way to resolve this is a
-logical argument, such as \code{errorIfMissing}, but that puts the decision
-in the wrong place and has to be threaded through every intervening layer.
+context and unremarkable in another. Signalling a classed condition lets the
+function describe what happened and leave the severity to the caller:
 
-Signalling a classed condition instead lets the function describe what
-happened and leave the severity to the caller:
-
-\preformatted{    readSession <- function (path) \{
+\preformatted{    readFile <- function (path) \{
         if (!file.exists(path))
-            return(signalWarning("Session #\{path\} does not exist",
-                                 class="missingSession", default=NULL))
+            return(signalWarning("File #\{path\} does not exist",
+                                 class="missingFile", default=NULL))
         ...
     \}}
 

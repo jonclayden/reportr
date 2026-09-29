@@ -16,11 +16,11 @@
 #' The output level is set by the \code{setOutputLevel} function, and governs
 #' whether a particular call to \code{report} will actually report anything.
 #' Output levels are described by the \code{OL} object, a list with components
-#' \code{Debug}, \code{Verbose}, \code{Info}, \code{Warning}, \code{Question},
-#' \code{Error} and \code{Fatal}. Any call to \code{report} using a level lower
-#' than the current output level will produce no output. If \code{report} is
-#' called before \code{setOutputLevel}, the output level will default to
-#' \code{Info} (with a message).
+#' \code{Ignore}, \code{Debug}, \code{Verbose}, \code{Info}, \code{Warning},
+#' \code{Question}, \code{Error} and \code{Fatal}. Any call to \code{report}
+#' using a level lower than the current output level will produce no output.
+#' If \code{report} is called before \code{setOutputLevel}, the output level
+#' will default to \code{Info} (with a message).
 #' 
 #' The \code{flag} function is called like \code{report}, but it stores
 #' messages for later reporting, like \code{\link{warning}}, rather than
@@ -34,8 +34,8 @@
 #' 
 #' The \code{ask} function requests input from the user, using
 #' \code{\link{readline}}, at output level \code{Question}. The text argument
-#' then forms the text of the question, and \code{ask} returns the text
-#' entered by the user.
+#' forms the text of the question, and \code{ask} returns the text entered by
+#' the user.
 #' 
 #' The \code{assert} function asserts that its first argument evaluates to
 #' \code{TRUE}, and prints an error message if not (or warning, etc., according
@@ -47,22 +47,22 @@
 #' \code{tryCatch(expr, reportrInfo=...)} will match. See
 #' \code{\link{reportrCondition}} for the structure of these objects, and
 #' \code{\link{signal}} for attaching more meaningful classes of your own.
-#'
+#' 
 #' The call \code{report(Error,\dots)} is similar to \code{stop(\dots)}, except
 #' that the message is formatted by reportr rather than by R, and a stack trace
 #' will be printed if the current output level is \code{Debug} and the level of
-#' the message is at least \code{reportrStackTraceLevel}. Since the condition is
-#' signalled before the message is reported, such errors can be caught with
+#' the message is at least \code{reportrStackTraceLevel}. Since the condition
+#' is signalled before the message is reported, such errors can be caught with
 #' \code{\link{try}} or \code{tryCatch(expr, error=...)} in the usual way. If
 #' nothing handles the condition the "abort" restart is invoked, which ends
 #' execution without R adding a second message of its own. An error is fatal
 #' whatever the current output level, and whether or not its message is
 #' filtered out of the output.
-#'
+#' 
 #' The \code{withReportrHandlers} function evaluates \code{expr} in a context
 #' in which R errors, warnings and messages will be handled by reportr, rather
 #' than by the standard R functions. See \code{\link{handlers}}.
-#'
+#' 
 #' The \code{prefixFormat} argument to \code{report} and \code{ask} controls
 #' how the output message is formatted. It takes the form of a
 #' \code{\link{sprintf}}-style format string, but with different expansions for
@@ -75,10 +75,10 @@
 #' formatted according to the \code{reportrTimeFormat} option. The default is
 #' \code{"\%d\%L: "}, giving a prefix such as \code{"* * INFO: "}, but this
 #' default can be overridden by setting the \code{reportrPrefixFormat} option.
-#'
+#' 
 #' Messages are written to one or more destinations, which may include files as
 #' well as the terminal. See \code{\link{destinations}}.
-#'
+#' 
 #' A number of other options influence the output produced by reportr.
 #' \code{getOutputLevel} and \code{setOutputLevel} get and set the
 #' \code{reportrOutputLevel} option, which can be set directly if preferred.
@@ -91,7 +91,7 @@
 #' signalled either way. The \code{reportrBaseClasses} option controls whether
 #' reportr conditions also inherit from R's own \code{"message"} and
 #' \code{"warning"} classes; see \code{\link{reportrCondition}}.
-#'
+#' 
 #' @param level The level of output message to produce, or for
 #'   \code{setOutputLevel}, the minimum level to display. See Details.
 #' @param \dots Objects which can be coerced to mode \code{character}. These
@@ -136,7 +136,7 @@
 #'   goes. \code{\link[ore]{es}} (in package \code{ore}) performs the
 #'   expression substitution applied to messages. \code{\link{message}},
 #'   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
-#'   the normal R message and condition signalling framework.
+#'   the normal R message and condition-signalling framework.
 #' @author Jon Clayden
 #' 
 #' @name reportr

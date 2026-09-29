@@ -58,8 +58,9 @@
 reportrCondition <- function (level, message, class = NULL, call = NULL, data = list())
 {
     level <- .evaluateLevel(level)
+    levelClass <- paste("reportr", names(OL)[which(OL == level)], sep="")
 
-    classes <- c(as.character(class), .levelClass(level), "reportrCondition")
+    classes <- c(as.character(class), levelClass, "reportrCondition")
     if (level >= OL$Error)
         classes <- c(classes, "error")
     else if (isTRUE(.resolveOption("reportrBaseClasses")))
@@ -72,11 +73,6 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
 
     structure(c(list(message=as.character(message)[1], call=call, level=level), data),
               class=c(classes,"condition"))
-}
-
-.levelClass <- function (level)
-{
-    paste("reportr", names(OL)[which(OL == level)], sep="")
 }
 
 # The informative classes of a condition raised outside reportr. These are
@@ -115,24 +111,23 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
 
     recoverable <- !identical(default, .noDefault)
     value <- if (recoverable) default else NULL
-
     condition <- reportrCondition(level, message, class, call,
                                   c(data, list(stack=sys.calls(), default=value, recoverable=recoverable)))
 
     recovered <- FALSE
     result <- withRestarts({
-                               signalCondition(condition)
-                               if (defer)
-                                   .bufferFlag(level, message, outputLevel)
-                               else
-                                   .report(level, message, prefixFormat, outputLevel, condition)
-                               value
-                           },
-                           muffleReport = function () value,
-                           useValue = function (newValue) {
-                               recovered <<- TRUE
-                               newValue
-                           })
+            signalCondition(condition)
+            if (defer)
+                .bufferFlag(level, message, outputLevel)
+            else
+                .report(level, message, prefixFormat, outputLevel, condition)
+            value
+        },
+        muffleReport=function () value,
+        useValue=function (newValue) {
+            recovered <<- TRUE
+            newValue
+        })
 
     if (!recovered && fatal)
         invokeRestart("abort")

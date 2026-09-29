@@ -40,18 +40,18 @@ reported. Levels may be named in any of the usual ways, so \code{Error},
 \code{OL$Error} and \code{"Error"} are equivalent. Mapping a class to
 \code{Ignore} suppresses it entirely.
 
-\preformatted{    # A missing session is an error here ...
-    session <- reportAs(readSession(path), missingSession=Error)
+\preformatted{    # A missing file is an error here ...
+    file <- reportAs(readFile(path), missingFile=Error)
 
     # ... but merely worth noting here
-    session <- reportAs(readSession(path), missingSession=Debug)}
+    file <- reportAs(readFile(path), missingFile=Debug)}
 
 Escalating a condition is always safe. Demoting one below \code{Error} is
 not, because code which signalled an error was generally not written to
 carry on afterwards. A demotion is therefore honoured only for conditions
 which were signalled with an explicit \code{default} value, and so declared
-recoverable; see \code{\link{signal}}. Demoting any other error reports it at
-the requested level, but it remains fatal.
+recoverable; see \code{\link{signal}}. Demoting any other error reports it
+at the requested level, but it remains fatal.
 
 A named argument may also be a function, in which case it is used as a
 calling handler for that class of condition, exactly as it would be by
@@ -65,14 +65,11 @@ at level \code{Info}, \code{\link{warning}} is flagged at level
 \code{Warning}, and \code{\link{stop}} is reported at level \code{Error}.
 The classes of the original condition are carried over to the \code{reportr}
 condition, and the original is stored in its \code{original} element, so a
-handler further out can still match it by class. Note that message text
-arriving from outside \code{reportr} is never passed through
-\code{\link[ore]{es}}, since it may legitimately contain the \code{"#\{\}"}
-substitution syntax.
+handler further out can still match it by class.
 
-\code{reportrHandlers(TRUE)} installs those same translations for the rest of
-the session, using \code{\link{globalCallingHandlers}}, so that code need not
-be wrapped at all. Like that function, it may only be called when no
+\code{reportrHandlers(TRUE)} installs those same translations for the rest
+of the session, using \code{\link{globalCallingHandlers}}, so that code need
+not be wrapped at all. Like that function, it may only be called when no
 handlers are already established, which in practice means at top level.
 \code{reportrHandlers(FALSE)} removes them again.
 }
