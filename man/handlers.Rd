@@ -40,23 +40,24 @@ reported. Levels may be named in any of the usual ways, so \code{Error},
 \code{OL$Error} and \code{"Error"} are equivalent. Mapping a class to
 \code{Ignore} suppresses it entirely.
 
-\preformatted{    # A missing file is an error here ...
-    file <- reportAs(readFile(path), missingFile=Error)
+\preformatted{    # A missing file is an error, as signalled ...
+    file <- locateFile(path)
 
     # ... but merely worth noting here
-    file <- reportAs(readFile(path), missingFile=Debug)}
+    file <- reportAs(locateFile(path), missingFile=Debug)}
 
 Escalating a condition is always safe. Demoting one below \code{Error} is
 not, because code which signalled an error was generally not written to
 carry on afterwards. A demotion is therefore honoured only for conditions
-which were signalled with an explicit \code{default} value, and so declared
-recoverable; see \code{\link{signal}}. Demoting any other error reports it
-at the requested level, but it remains fatal.
+signalled by \code{\link{fallback}}, which supplies a value to continue
+with. Demoting any other error reports it at the requested level, but it
+remains fatal.
 
 A named argument may also be a function, in which case it is used as a
 calling handler for that class of condition, exactly as it would be by
 \code{\link{withCallingHandlers}}. Such a handler may invoke the
-\code{muffleReport} or \code{useValue} restarts; see
+\code{muffleReport} restart, or for a condition signalled by
+\code{\link{fallback}} the \code{useValue} restart; see
 \code{\link{reportrCondition}}.
 
 \code{withReportrHandlers} also translates conditions raised by code which
@@ -78,12 +79,12 @@ setOutputLevel(OL$Info)
 
 findThing <- function (name) {
     if (name != "widget")
-        return(signalWarning("There is no #{name}", class="missingThing", default=NA))
+        return(fallback(NA, "There is no #{name}", class="missingThing"))
     return("the widget")
 }
 
-# Reported as a warning by default
-findThing("sprocket")
+# Reported as a warning, rather than an error
+reportAs(findThing("sprocket"), missingThing=Warning)
 
 # Suppressed entirely
 reportAs(findThing("sprocket"), missingThing=Ignore)
@@ -93,7 +94,8 @@ withReportrHandlers(sqrt(-5:-1))
 
 }
 \seealso{
-\code{\link{signal}} for signalling these conditions, and
+\code{\link{report}} and \code{\link{fallback}} for signalling
+  these conditions, and
   \code{\link{reportrCondition}} for their structure.
 }
 \author{

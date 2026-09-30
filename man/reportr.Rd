@@ -19,16 +19,17 @@ getOutputLevel()
 
 ask(..., default = NULL, valid = NULL, prefixFormat = NULL)
 
-report(level, ..., prefixFormat = NULL)
+report(level, ..., class = NULL, call = sys.call(-1),
+  prefixFormat = NULL)
 
-flag(level, ...)
+flag(level, ..., class = NULL, call = sys.call(-1))
 
 reportFlags()
 
 clearFlags()
 
-assert(expr, ..., level = OL$Error, prefixFormat = NULL,
-  envir = parent.frame())
+assert(expr, ..., class = NULL, level = OL$Error, call = sys.call(-1),
+  prefixFormat = NULL, envir = parent.frame())
 }
 \arguments{
 \item{level}{The level of output message to produce, or for
@@ -49,6 +50,13 @@ suitable response. (Matching is not case-sensitive.)}
 
 \item{prefixFormat}{The format of the string prepended to the message. See
 Details.}
+
+\item{class}{A character vector of classes to attach to the condition, or
+\code{NULL}. A class derived from the level of the message, such as
+\code{"reportrWarning"}, is always attached in addition to these.}
+
+\item{call}{The call to associate with the condition. Defaults to the call
+of the function which is reporting.}
 
 \item{expr}{An expression to be evaluated.}
 
@@ -103,14 +111,29 @@ the user.
 
 The \code{assert} function asserts that its first argument evaluates to
 \code{TRUE}, and prints an error message if not (or warning, etc., according
-to the specified output level for the message).
+to the specified output level for the message). An error raised by
+\code{assert} cannot be demoted by the caller, because the function has
+nothing sensible to continue with; see \code{\link{fallback}} for errors
+which the caller may choose to demote.
 
 Every message is signalled as an R condition before it is reported, so that
 calling code can intercept it. The condition's class vector always includes
 one derived from the level of the message, such as \code{"reportrInfo"}, so
 \code{tryCatch(expr, reportrInfo=...)} will match. See
-\code{\link{reportrCondition}} for the structure of these objects, and
-\code{\link{signal}} for attaching more meaningful classes of your own.
+\code{\link{reportrCondition}} for the structure of these objects.
+
+The \code{class} argument to \code{report}, \code{flag} and \code{assert}
+attaches classes of your own to the condition. This is worth doing whenever
+a caller might reasonably want to act on a particular kind of message:
+\code{\link{reportAs}} can then escalate, demote or suppress it, without the
+function which detects the problem having to be told in advance how serious
+it is. For example, a function which returns a partial result might report
+the omissions at level \code{Warning} with a class, and leave any caller who
+needs a complete result to escalate that class to \code{Error}. Unlike
+unclassed messages, classed ones are signalled even when the current output
+level means that they will not be reported, since the class is there for the
+benefit of callers. A function which cannot do what was asked of it, but has
+a value to return instead, should use \code{\link{fallback}}.
 
 The call \code{report(Error,\dots)} is similar to \code{stop(\dots)}, except
 that the message is formatted by reportr rather than by R, and a stack trace
@@ -171,10 +194,9 @@ report(OL$Info, "Hello, #{name}")}
 
 }
 \seealso{
-\code{\link{signal}} for attaching classes to messages, so that
-  callers can decide how serious they are; \code{\link{handlers}} for acting
-  on them; \code{\link{reportrCondition}} for the condition objects
-  themselves; and \code{\link{destinations}} for controlling where output
+\code{\link{fallback}} for errors which callers may demote;
+  \code{\link{handlers}} for acting on classed messages;
+  \code{\link{reportrCondition}} for the condition objects themselves; and \code{\link{destinations}} for controlling where output
   goes. \code{\link[ore]{es}} (in package \code{ore}) performs the
   expression substitution applied to messages. \code{\link{message}},
   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for

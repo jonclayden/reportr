@@ -47,18 +47,19 @@ not the default, since it allows unrelated code to silence reportr output.
 
 In addition to the standard \code{message} and \code{call} elements, the
 condition carries the \code{level} of the message, the \code{stack} of calls
-in effect when it was signalled, the \code{default} value which the
-signalling function will return if the condition goes unhandled, and a
-\code{recoverable} flag indicating whether that default was explicitly
-supplied. See \code{\link{signal}} for the significance of the last of
-these.
+in effect when it was signalled, and a \code{recoverable} flag. A condition
+signalled by \code{\link{fallback}} is recoverable, which means that the
+signalling function has a value to return instead of doing what was asked of
+it, and that value is stored in the \code{default} element. For any other
+condition \code{default} is \code{NULL}.
 
-Two restarts are established while the condition is being signalled.
-Invoking \code{muffleReport} suppresses the reporting of the message, but
-does not otherwise affect the flow of control, so an error will still be
-fatal. Invoking \code{useValue} with a single argument suppresses reporting
-\emph{and} the error, and provides the value which the signalling function
-will return.
+Every condition establishes a \code{muffleReport} restart while it is being
+signalled. Invoking it suppresses the reporting of the message, but does not
+otherwise affect the flow of control, so an error will still be fatal.
+Recoverable conditions additionally establish a \code{useValue} restart.
+Invoking it with a single argument suppresses reporting \emph{and} any
+error, and provides the value which the signalling function will return in
+place of its default.
 }
 \examples{
 cond <- reportrCondition(OL$Warning, "Something is amiss", class="myWarning")
@@ -67,8 +68,8 @@ conditionMessage(cond)
 
 }
 \seealso{
-\code{\link{signal}} for signalling conditions,
-  \code{\link{reportAs}} for handling them, and
+\code{\link{report}} and \code{\link{fallback}} for signalling
+  conditions, \code{\link{reportAs}} for handling them, and
   \code{\link{conditions}} for R's condition system in general.
 }
 \author{
