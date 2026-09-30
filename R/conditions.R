@@ -23,18 +23,19 @@
 #'
 #' In addition to the standard \code{message} and \code{call} elements, the
 #' condition carries the \code{level} of the message, the \code{stack} of calls
-#' in effect when it was signalled, the \code{default} value which the
-#' signalling function will return if the condition goes unhandled, and a
-#' \code{recoverable} flag indicating whether that default was explicitly
-#' supplied. See \code{\link{signal}} for the significance of the last of
-#' these.
+#' in effect when it was signalled, and a \code{recoverable} flag. A condition
+#' signalled by \code{\link{fallback}} is recoverable, which means that the
+#' signalling function has a value to return instead of doing what was asked of
+#' it, and that value is stored in the \code{default} element. For any other
+#' condition \code{default} is \code{NULL}.
 #'
-#' Two restarts are established while the condition is being signalled.
-#' Invoking \code{muffleReport} suppresses the reporting of the message, but
-#' does not otherwise affect the flow of control, so an error will still be
-#' fatal. Invoking \code{useValue} with a single argument suppresses reporting
-#' \emph{and} the error, and provides the value which the signalling function
-#' will return.
+#' Every condition establishes a \code{muffleReport} restart while it is being
+#' signalled. Invoking it suppresses the reporting of the message, but does not
+#' otherwise affect the flow of control, so an error will still be fatal.
+#' Recoverable conditions additionally establish a \code{useValue} restart.
+#' Invoking it with a single argument suppresses reporting \emph{and} any
+#' error, and provides the value which the signalling function will return in
+#' place of its default.
 #'
 #' @param level The level of the message. See \code{\link{report}}.
 #' @param message A character string giving the message, in its final form.
@@ -50,8 +51,8 @@
 #' class(cond)
 #' conditionMessage(cond)
 #'
-#' @seealso \code{\link{signal}} for signalling conditions,
-#'   \code{\link{reportAs}} for handling them, and
+#' @seealso \code{\link{report}} and \code{\link{fallback}} for signalling
+#'   conditions, \code{\link{reportAs}} for handling them, and
 #'   \code{\link{conditions}} for R's condition system in general.
 #' @author Jon Clayden
 #' @export
@@ -94,10 +95,12 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
 
 # The core of the package: signal a condition for a message which is already in
 # its final form, report it if nothing intervenes, and abort if it is an error.
-# Returns the value that the signalling function should return
+# A recoverable condition carries a value for the signalling function to
+# return, which a handler may replace, and only such a condition can have an
+# error demoted. Returns the value that the signalling function should return
 .signal <- function (level, message, class = NULL, call = NULL, prefixFormat = NULL,
-                     default = .noDefault, outputLevel = .outputLevel(), defer = FALSE,
-                     data = list())
+                     value = NULL, recoverable = FALSE, outputLevel = .outputLevel(),
+                     defer = FALSE, data = list())
 {
     fatal <- (level >= OL$Error)
 
@@ -109,25 +112,34 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
         return (invisible(NULL))
     }
 
-    recoverable <- !identical(default, .noDefault)
-    value <- if (recoverable) default else NULL
+    if (!recoverable)
+        value <- NULL
     condition <- reportrCondition(level, message, class, call,
                                   c(data, list(stack=sys.calls(), default=value, recoverable=recoverable)))
 
+    body <- function () {
+        signalCondition(condition)
+        if (defer)
+            .bufferFlag(level, message, outputLevel)
+        else
+            .report(level, message, prefixFormat, outputLevel, condition)
+        value
+    }
+
+    # The useValue restart is only offered for recoverable conditions, since
+    # code which did not say what to continue with is not safe to resume
     recovered <- FALSE
-    result <- withRestarts({
-            signalCondition(condition)
-            if (defer)
-                .bufferFlag(level, message, outputLevel)
-            else
-                .report(level, message, prefixFormat, outputLevel, condition)
-            value
-        },
-        muffleReport=function () value,
-        useValue=function (newValue) {
-            recovered <<- TRUE
-            newValue
-        })
+    if (recoverable)
+    {
+        result <- withRestarts(body(),
+            muffleReport=function () value,
+            useValue=function (newValue) {
+                recovered <<- TRUE
+                newValue
+            })
+    }
+    else
+        result <- withRestarts(body(), muffleReport=function () value)
 
     if (!recovered && fatal)
         invokeRestart("abort")

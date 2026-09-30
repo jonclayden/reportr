@@ -153,7 +153,7 @@ reportDestinations <- function ()
         callStrings <- callStrings[-seq_len(lastFrame)]
     }
 
-    raisingFunLoc <- which(callStrings %~% "^\\.?(ask|flag|report|reportFlags|signal\\w*|message|warning|stop)\\(")
+    raisingFunLoc <- which(callStrings %~% "^\\.?(ask|assert|fallback|flag|report|reportFlags|signal|message|warning|stop)\\(")
     if (length(raisingFunLoc) > 0)
         callStrings <- callStrings[-(raisingFunLoc[1]:length(callStrings))]
 

@@ -28,7 +28,7 @@ expect_stdout(withReportrHandlers(message("literal #{40+2}")), "#{40+2}", fixed=
 expect_stdout(withReportrHandlers(warning("literal #{40+2}")), "#{40+2}", fixed=TRUE)
 
 # withReportrHandlers also accepts class mappings
-findThing <- function () signalWarning("missing", class="missingThing", default=NA)
+findThing <- function () { report(Warning, "missing", class="missingThing"); NA }
 expect_silent(withReportrHandlers(findThing(), missingThing=Ignore))
 expect_error(withReportrHandlers(findThing(), missingThing=Error), "missing")
 expect_equal(withReportrHandlers(findThing(), missingThing=Ignore), NA)

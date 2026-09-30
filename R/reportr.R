@@ -39,14 +39,29 @@
 #' 
 #' The \code{assert} function asserts that its first argument evaluates to
 #' \code{TRUE}, and prints an error message if not (or warning, etc., according
-#' to the specified output level for the message).
+#' to the specified output level for the message). An error raised by
+#' \code{assert} cannot be demoted by the caller, because the function has
+#' nothing sensible to continue with; see \code{\link{fallback}} for errors
+#' which the caller may choose to demote.
 #' 
 #' Every message is signalled as an R condition before it is reported, so that
 #' calling code can intercept it. The condition's class vector always includes
 #' one derived from the level of the message, such as \code{"reportrInfo"}, so
 #' \code{tryCatch(expr, reportrInfo=...)} will match. See
-#' \code{\link{reportrCondition}} for the structure of these objects, and
-#' \code{\link{signal}} for attaching more meaningful classes of your own.
+#' \code{\link{reportrCondition}} for the structure of these objects.
+#' 
+#' The \code{class} argument to \code{report}, \code{flag} and \code{assert}
+#' attaches classes of your own to the condition. This is worth doing whenever
+#' a caller might reasonably want to act on a particular kind of message:
+#' \code{\link{reportAs}} can then escalate, demote or suppress it, without the
+#' function which detects the problem having to be told in advance how serious
+#' it is. For example, a function which returns a partial result might report
+#' the omissions at level \code{Warning} with a class, and leave any caller who
+#' needs a complete result to escalate that class to \code{Error}. Unlike
+#' unclassed messages, classed ones are signalled even when the current output
+#' level means that they will not be reported, since the class is there for the
+#' benefit of callers. A function which cannot do what was asked of it, but has
+#' a value to return instead, should use \code{\link{fallback}}.
 #' 
 #' The call \code{report(Error,\dots)} is similar to \code{stop(\dots)}, except
 #' that the message is formatted by reportr rather than by R, and a stack trace
@@ -99,6 +114,11 @@
 #'   package) for expression substitution, and then printed with no space
 #'   between them. Options to \code{\link[ore]{es}}, such as \code{round}, may
 #'   also be given.
+#' @param class A character vector of classes to attach to the condition, or
+#'   \code{NULL}. A class derived from the level of the message, such as
+#'   \code{"reportrWarning"}, is always attached in addition to these.
+#' @param call The call to associate with the condition. Defaults to the call
+#'   of the function which is reporting.
 #' @param prefixFormat The format of the string prepended to the message. See
 #'   Details.
 #' @param default A default return value, to be used when the message is
@@ -129,10 +149,9 @@
 #' \dontrun{name <- ask("What is your name?")
 #' report(OL$Info, "Hello, #{name}")}
 #' 
-#' @seealso \code{\link{signal}} for attaching classes to messages, so that
-#'   callers can decide how serious they are; \code{\link{handlers}} for acting
-#'   on them; \code{\link{reportrCondition}} for the condition objects
-#'   themselves; and \code{\link{destinations}} for controlling where output
+#' @seealso \code{\link{fallback}} for errors which callers may demote;
+#'   \code{\link{handlers}} for acting on classed messages;
+#'   \code{\link{reportrCondition}} for the condition objects themselves; and \code{\link{destinations}} for controlling where output
 #'   goes. \code{\link[ore]{es}} (in package \code{ore}) performs the
 #'   expression substitution applied to messages. \code{\link{message}},
 #'   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
@@ -259,19 +278,21 @@ ask <- function (..., default = NULL, valid = NULL, prefixFormat = NULL)
 
 #' @rdname reportr
 #' @export
-report <- function (level, ..., prefixFormat = NULL)
+report <- function (level, ..., class = NULL, call = sys.call(-1), prefixFormat = NULL)
 {
     level <- .evaluateLevel(level)
     outputLevel <- .outputLevel()
 
     # The fast path: nothing will be reported, so unless the message is fatal
-    # or something is listening for it, there is no need to build it at all
-    if (outputLevel > level && level < OL$Error && !.handlersActive())
+    # or something is listening for it, there is no need to build it at all. A
+    # classed condition is always signalled, since the class is there for the
+    # benefit of callers
+    if (outputLevel > level && level < OL$Error && is.null(class) && !.handlersActive())
         return (invisible(NULL))
 
     message <- .buildMessage(..., .envir=parent.frame())
 
-    .signal(level, message, prefixFormat=prefixFormat, outputLevel=outputLevel)
+    .signal(level, message, class=class, call=call, prefixFormat=prefixFormat, outputLevel=outputLevel)
 }
 
 # Report a message which is already in its final form, so no expression
@@ -291,7 +312,7 @@ report <- function (level, ..., prefixFormat = NULL)
 
 #' @rdname reportr
 #' @export
-flag <- function (level, ...)
+flag <- function (level, ..., class = NULL, call = sys.call(-1))
 {
     level <- .evaluateLevel(level)
     outputLevel <- .outputLevel()
@@ -300,7 +321,7 @@ flag <- function (level, ...)
 
     # The condition is signalled here, where the message arises, even though
     # the message itself is not reported until later
-    .signal(level, message, outputLevel=outputLevel, defer=TRUE)
+    .signal(level, message, class=class, call=call, outputLevel=outputLevel, defer=TRUE)
 }
 
 # Store a message which is already in its final form, for later reporting
@@ -356,14 +377,14 @@ clearFlags <- function ()
 
 #' @rdname reportr
 #' @export
-assert <- function (expr, ..., level = OL$Error, prefixFormat = NULL, envir = parent.frame())
+assert <- function (expr, ..., class = NULL, level = OL$Error, call = sys.call(-1), prefixFormat = NULL, envir = parent.frame())
 {
     result <- try(as.logical(eval(substitute(expr), envir)), silent=TRUE)
     if (!isTRUE(result))
     {
         level <- .evaluateLevel(level)
         message <- .buildMessage(..., .envir=envir)
-        .signal(level, message, prefixFormat=prefixFormat)
+        .signal(level, message, class=class, call=call, prefixFormat=prefixFormat)
     }
     invisible(NULL)
 }

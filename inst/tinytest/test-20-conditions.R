@@ -63,5 +63,30 @@ expect_stdout(assert(report(OL$Error,"inner"), "could not be evaluated", level=O
 # The muffleReport restart suppresses output without affecting the result
 expect_silent(withCallingHandlers(report(OL$Info,"quiet"), reportrInfo=function(cond) invokeRestart("muffleReport")))
 
-# The useValue restart recovers, even from an error
-expect_equal(withCallingHandlers(report(OL$Error,"recover"), reportrError=function(cond) invokeRestart("useValue", 99)), 99)
+# The useValue restart recovers from a fallback, even when it is an error
+expect_equal(withCallingHandlers(fallback(0,"recover"), reportrError=function(cond) invokeRestart("useValue", 99)), 99)
+
+# Classes can be attached to reported and flagged messages
+expect_equal(tryCatch(report(Warning,"m",class="mine"), mine=function(cond) class(cond)[1:3]),
+             c("mine","reportrWarning","reportrCondition"))
+expect_equal(tryCatch(flag(Warning,"m",class="mine"), mine=function(cond) "caught"), "caught")
+clearFlags()
+expect_equal(tryCatch(assert(FALSE,"m",class="mine"), mine=function(cond) "caught"), "caught")
+expect_equal(tryCatch(report(Error,"m",class="myError"), myError=function(cond) "caught"), "caught")
+
+# The call is recorded, so handlers can see where the condition arose
+h <- function (a) report(Warning, "m", class="k")
+expect_equal(as.character(tryCatch(h(1), k=function(cond) conditionCall(cond))[[1]]), "h")
+
+# A classed message is signalled even when it will not be reported, and
+# without any handlers established by reportr
+setOutputLevel(OL$Warning)
+expect_equal(tryCatch(report(Info,"quiet",class="quietClass"), quietClass=function(cond) "signalled"), "signalled")
+expect_silent(report(Info, "quiet", class="quietClass"))
+setOutputLevel(OL$Info)
+
+# Only fallback() makes a condition recoverable, so other errors don't offer
+# useValue, and other messages can only be muffled
+expect_false(tryCatch(report(Warning,"m",class="k"), k=function(cond) cond$recoverable))
+expect_false(tryCatch(report(Error,"m",class="k"), k=function(cond) "useValue" %in% sapply(computeRestarts(cond),"[[","name")))
+expect_silent(withCallingHandlers(report(Warning,"m",class="k"), k=function(cond) invokeRestart("muffleReport")))

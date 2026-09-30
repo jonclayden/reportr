@@ -42,7 +42,7 @@ addReportDestination(function (text, level, condition) {
                          classes <<- c(classes, class(condition)[1])
                      }, name="fn")
 removeReportDestination("terminal")
-signalWarning("classed", class="myThing")
+report(Warning, "classed", class="myThing")
 clearReportDestinations()
 expect_equal(levels, OL$Warning)
 expect_equal(classes, "myThing")

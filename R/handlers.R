@@ -13,23 +13,24 @@
 #' \code{OL$Error} and \code{"Error"} are equivalent. Mapping a class to
 #' \code{Ignore} suppresses it entirely.
 #'
-#' \preformatted{    # A missing file is an error here ...
-#'     file <- reportAs(readFile(path), missingFile=Error)
+#' \preformatted{    # A missing file is an error, as signalled ...
+#'     file <- locateFile(path)
 #'
 #'     # ... but merely worth noting here
-#'     file <- reportAs(readFile(path), missingFile=Debug)}
+#'     file <- reportAs(locateFile(path), missingFile=Debug)}
 #'
 #' Escalating a condition is always safe. Demoting one below \code{Error} is
 #' not, because code which signalled an error was generally not written to
 #' carry on afterwards. A demotion is therefore honoured only for conditions
-#' which were signalled with an explicit \code{default} value, and so declared
-#' recoverable; see \code{\link{signal}}. Demoting any other error reports it
-#' at the requested level, but it remains fatal.
+#' signalled by \code{\link{fallback}}, which supplies a value to continue
+#' with. Demoting any other error reports it at the requested level, but it
+#' remains fatal.
 #'
 #' A named argument may also be a function, in which case it is used as a
 #' calling handler for that class of condition, exactly as it would be by
 #' \code{\link{withCallingHandlers}}. Such a handler may invoke the
-#' \code{muffleReport} or \code{useValue} restarts; see
+#' \code{muffleReport} restart, or for a condition signalled by
+#' \code{\link{fallback}} the \code{useValue} restart; see
 #' \code{\link{reportrCondition}}.
 #'
 #' \code{withReportrHandlers} also translates conditions raised by code which
@@ -59,12 +60,12 @@
 #'
 #' findThing <- function (name) {
 #'     if (name != "widget")
-#'         return(signalWarning("There is no #{name}", class="missingThing", default=NA))
+#'         return(fallback(NA, "There is no #{name}", class="missingThing"))
 #'     return("the widget")
 #' }
 #'
-#' # Reported as a warning by default
-#' findThing("sprocket")
+#' # Reported as a warning, rather than an error
+#' reportAs(findThing("sprocket"), missingThing=Warning)
 #'
 #' # Suppressed entirely
 #' reportAs(findThing("sprocket"), missingThing=Ignore)
@@ -72,7 +73,8 @@
 #' # Consolidate duplicated warnings from code that doesn't use reportr
 #' withReportrHandlers(sqrt(-5:-1))
 #'
-#' @seealso \code{\link{signal}} for signalling these conditions, and
+#' @seealso \code{\link{report}} and \code{\link{fallback}} for signalling
+#'   these conditions, and
 #'   \code{\link{reportrCondition}} for their structure.
 #' @author Jon Clayden
 #' @name handlers
@@ -117,16 +119,23 @@ NULL
             # not safe to resume it. Explain, and return normally so that the
             # condition stands as it was signalled: any handler further out
             # still gets its chance, and the error remains catchable
-            .report(OL$Warning, paste("A fatal \"", class(condition)[1], "\" condition cannot be demoted, as it specifies no value to continue with", sep=""))
+            .report(OL$Warning, paste("A fatal \"", class(condition)[1], "\" condition cannot be demoted, as it has no value to continue with", sep=""))
             return (invisible(NULL))
         }
 
-        # Reporting at level Ignore means reporting nothing at all
+        # Reporting at level Ignore means reporting nothing at all. Otherwise
+        # the condition is signalled afresh, keeping its value and whether it
+        # is recoverable, so that a handler further out can remap it again or
+        # supply a different value
+        value <- condition$default
         if (newLevel > OL$Ignore)
-            .signal(newLevel, conditionMessage(condition), class=.userClasses(condition), call=conditionCall(condition), data=list(original=condition))
+            value <- .signal(newLevel, conditionMessage(condition), class=.userClasses(condition), call=conditionCall(condition), value=value, recoverable=isTRUE(condition$recoverable), data=list(original=condition))
 
-        if (demoting || oldLevel < OL$Error)
-            invokeRestart("useValue", condition$default)
+        # Reaching this point means that nothing further out made the new
+        # condition fatal, so a recoverable one resumes with its value, while
+        # any other is resumed (or not) as it would have been anyway
+        if (isTRUE(condition$recoverable))
+            invokeRestart("useValue", value)
         else
             invokeRestart("muffleReport")
     }
