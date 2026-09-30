@@ -78,21 +78,14 @@
 #' in which R errors, warnings and messages will be handled by reportr, rather
 #' than by the standard R functions. See \code{\link{handlers}}.
 #' 
-#' The \code{prefixFormat} argument to \code{report} and \code{ask} controls
-#' how the output message is formatted. It takes the form of a
-#' \code{\link{sprintf}}-style format string, but with different expansions for
-#' percent-escapes. Specifically, \code{"\%d"} expands to a series of stars
-#' indicating the current stack depth; \code{"\%f"} gives the name of the
-#' function calling \code{report} or \code{ask}; \code{"\%l"} and \code{"\%L"}
-#' give lower and upper case versions of the level of the message,
-#' respectively; \code{"\%p"} expands to the ID of the current R process (see
-#' \code{\link{Sys.getpid}}); and \code{"\%t"} expands to the current time,
-#' formatted according to the \code{reportrTimeFormat} option. The default is
-#' \code{"\%d\%L: "}, giving a prefix such as \code{"* * INFO: "}, but this
-#' default can be overridden by setting the \code{reportrPrefixFormat} option.
-#' 
-#' Messages are written to one or more destinations, which may include files as
-#' well as the terminal. See \code{\link{destinations}}.
+#' Messages are written to one or more output targets, which may include files
+#' as well as the terminal, and each of which formats messages with its own
+#' prefix. The default prefix is \code{"\%d\%L: "}, which gives a prefix such
+#' as \code{"* * INFO: "}, with one star for each level of the call stack at
+#' which the message arose. See \code{\link{targets}} for how to change it.
+#' Setting the \code{prefix} argument to \code{report}, \code{assert} or
+#' \code{ask} to \code{FALSE} writes that message without any prefix, to any
+#' target, which is useful for headings and other formatted output.
 #' 
 #' A number of other options influence the output produced by reportr.
 #' \code{getOutputLevel} and \code{setOutputLevel} get and set the
@@ -119,8 +112,10 @@
 #'   \code{"reportrWarning"}, is always attached in addition to these.
 #' @param call The call to associate with the condition. Defaults to the call
 #'   of the function which is reporting.
-#' @param prefixFormat The format of the string prepended to the message. See
-#'   Details.
+#' @param prefix Logical value: should the message be prefixed, according to
+#'   the format for each output target? See Details.
+#' @param prefixFormat Deprecated. A value of \code{""} is equivalent to
+#'   \code{prefix=FALSE}, and any other value is ignored with a warning.
 #' @param default A default return value, to be used when the message is
 #'   filtered out or the output level is above \code{Question}.
 #' @param valid For \code{ask}, a character vector of valid responses. If
@@ -151,8 +146,9 @@
 #' 
 #' @seealso \code{\link{fallback}} for errors which callers may demote;
 #'   \code{\link{handlers}} for acting on classed messages;
-#'   \code{\link{reportrCondition}} for the condition objects themselves; and \code{\link{destinations}} for controlling where output
-#'   goes. \code{\link[ore]{es}} (in package \code{ore}) performs the
+#'   \code{\link{reportrCondition}} for the condition objects themselves; and
+#'   \code{\link{targets}} for controlling where output goes, and how it is
+#'   formatted. \code{\link[ore]{es}} (in package \code{ore}) performs the
 #'   expression substitution applied to messages. \code{\link{message}},
 #'   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
 #'   the normal R message and condition-signalling framework.
@@ -172,20 +168,21 @@ NULL
 
 # Resolve a level given as OL$Info, as the bare name Info, or as the string
 # "Info". The common case, OL$Info, is a call rather than a name, so it takes
-# the cheapest path through this function
-.evaluateLevel <- function (level)
+# the cheapest path through this function. The expression may be given
+# explicitly, for arguments not called "level"
+.evaluateLevel <- function (level, expression = substitute(level, parent.frame()))
 {
-    expression <- substitute(level, parent.frame())
     if (is.symbol(expression))
     {
         name <- as.character(expression)
         if (name %in% names(OL))
             return (OL[[name]])
     }
-    else if (is.character(level) && length(level) == 1L && level %in% names(OL))
-        return (OL[[level]])
 
-    return (level)
+    if (is.character(level) && length(level) == 1L && level %in% names(OL))
+        return (OL[[level]])
+    else
+        return (level)
 }
 
 #' @rdname reportr
@@ -216,7 +213,7 @@ getOutputLevel <- function ()
     if (is.null(level))
     {
         setOutputLevel(OL$Info)
-        .report(OL$Info, "Output level is not set; defaulting to \"Info\"", prefixFormat="", outputLevel=OL$Info)
+        .report(OL$Info, "Output level is not set; defaulting to \"Info\"", plain=TRUE, outputLevel=OL$Info)
         level <- OL$Info
     }
     return (level)
@@ -246,14 +243,33 @@ getOutputLevel <- function ()
     es(paste(..., sep=""), round=round, signif=signif, envir=.envir)
 }
 
+# Interpret the deprecated "prefixFormat" argument. The empty string, which
+# was its main use, means no prefix; anything else is ignored, since prefixes
+# now belong to output targets
+.resolvePrefix <- function (prefix, prefixFormat)
+{
+    if (is.null(prefixFormat))
+        return (isTRUE(prefix))
+    else if (identical(as.character(prefixFormat), ""))
+        return (FALSE)
+
+    if (!isTRUE(.Workspace$warnedPrefixFormat))
+    {
+        .Workspace$warnedPrefixFormat <- TRUE
+        .report(OL$Warning, "The \"prefixFormat\" argument is deprecated and will be ignored; set the prefix of an output target instead")
+    }
+    return (isTRUE(prefix))
+}
+
 # Simple wrappers, to facilitate mocking in the tests
 .interactive <- function() base::interactive()      # nocov
 .readline <- function(...) base::readline(...)      # nocov
 
 #' @rdname reportr
 #' @export
-ask <- function (..., default = NULL, valid = NULL, prefixFormat = NULL)
+ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat = NULL)
 {
+    prefix <- .resolvePrefix(prefix, prefixFormat)
     outputLevel <- .outputLevel()
     message <- .buildMessage(..., .envir=parent.frame())
     if (!.interactive() || outputLevel > OL$Question || !.shouldReport(message))
@@ -263,7 +279,7 @@ ask <- function (..., default = NULL, valid = NULL, prefixFormat = NULL)
         reportFlags()
         repeat
         {
-            ans <- .readline(paste(.buildPrefix(OL$Question,prefixFormat), message, " ", sep=""))
+            ans <- .readline(paste(if (prefix) .buildPrefix(OL$Question,.terminalPrefix()) else "", message, " ", sep=""))
             if (is.null(valid))
                 return (ans)
             else
@@ -278,7 +294,7 @@ ask <- function (..., default = NULL, valid = NULL, prefixFormat = NULL)
 
 #' @rdname reportr
 #' @export
-report <- function (level, ..., class = NULL, call = sys.call(-1), prefixFormat = NULL)
+report <- function (level, ..., class = NULL, call = sys.call(-1), prefix = TRUE, prefixFormat = NULL)
 {
     level <- .evaluateLevel(level)
     outputLevel <- .outputLevel()
@@ -292,20 +308,20 @@ report <- function (level, ..., class = NULL, call = sys.call(-1), prefixFormat 
 
     message <- .buildMessage(..., .envir=parent.frame())
 
-    .signal(level, message, class=class, call=call, prefixFormat=prefixFormat, outputLevel=outputLevel)
+    .signal(level, message, class=class, call=call, plain=!.resolvePrefix(prefix,prefixFormat), outputLevel=outputLevel)
 }
 
 # Report a message which is already in its final form, so no expression
 # substitution is performed, and no condition is signalled. Everything which
 # ends up being rendered passes through here
-.report <- function (level, message, prefixFormat = NULL, outputLevel = .outputLevel(), condition = NULL)
+.report <- function (level, message, plain = FALSE, outputLevel = .outputLevel(), condition = NULL)
 {
     if (is.null(message) || outputLevel > level || !.shouldReport(message))
         return (invisible(NULL))
 
     reportFlags()
 
-    .render(level, message, prefixFormat, outputLevel, condition)
+    .render(level, message, outputLevel, condition, plain)
 
     invisible(NULL)
 }
@@ -325,14 +341,16 @@ flag <- function (level, ..., class = NULL, call = sys.call(-1))
 }
 
 # Store a message which is already in its final form, for later reporting
-.bufferFlag <- function (level, message, outputLevel = .outputLevel())
+.bufferFlag <- function (level, message, outputLevel = .outputLevel(), condition = NULL)
 {
     # In debug mode, sufficiently important messages are reported immediately,
     # so that they appear at the point where they arise
     if (outputLevel == OL$Debug && level >= .resolveOption("reportrStackTraceLevel"))
-        return (.report(level, message, outputLevel=outputLevel))
+        return (.report(level, message, outputLevel=outputLevel, condition=condition))
 
-    currentFlag <- list(list(level=level, message=message))
+    # The condition is kept so that the message can be rendered as it would
+    # have been where it arose
+    currentFlag <- list(list(level=level, message=message, condition=condition))
 
     if (!exists("reportrFlags",.Workspace) || is.null(.Workspace$reportrFlags))
         .Workspace$reportrFlags <- currentFlag
@@ -348,8 +366,9 @@ reportFlags <- function ()
 {
     if (exists("reportrFlags",.Workspace) && !is.null(.Workspace$reportrFlags))
     {
-        levels <- unlist(lapply(.Workspace$reportrFlags, "[[", "level"))
-        messages <- unlist(lapply(.Workspace$reportrFlags, "[[", "message"))
+        flags <- .Workspace$reportrFlags
+        levels <- unlist(lapply(flags, "[[", "level"))
+        messages <- unlist(lapply(flags, "[[", "message"))
         
         # This is before the call to report() to avoid infinite recursion
         clearFlags()
@@ -359,11 +378,12 @@ reportFlags <- function ()
             locs <- which(messages == message)
             level <- max(levels[locs])
             # These messages were signalled when they were flagged, so they are
-            # reported directly rather than being signalled a second time
-            if (length(locs) == 1)
-                .report(level, message, prefixFormat="%L: ")
-            else
-                .report(level, paste("[x",length(locs),"] ",message,sep=""), prefixFormat="%L: ")
+            # reported directly rather than being signalled a second time.
+            # Repeated messages are rendered as the most severe instance was
+            condition <- flags[[locs[which.max(levels[locs])]]]$condition
+            if (length(locs) > 1)
+                message <- paste("[x",length(locs),"] ",message,sep="")
+            .report(level, message, condition=condition)
         }
     }
 }
@@ -377,14 +397,14 @@ clearFlags <- function ()
 
 #' @rdname reportr
 #' @export
-assert <- function (expr, ..., class = NULL, level = OL$Error, call = sys.call(-1), prefixFormat = NULL, envir = parent.frame())
+assert <- function (expr, ..., class = NULL, level = OL$Error, call = sys.call(-1), prefix = TRUE, prefixFormat = NULL, envir = parent.frame())
 {
     result <- try(as.logical(eval(substitute(expr), envir)), silent=TRUE)
     if (!isTRUE(result))
     {
         level <- .evaluateLevel(level)
         message <- .buildMessage(..., .envir=envir)
-        .signal(level, message, class=class, call=call, prefixFormat=prefixFormat)
+        .signal(level, message, class=class, call=call, plain=!.resolvePrefix(prefix,prefixFormat))
     }
     invisible(NULL)
 }

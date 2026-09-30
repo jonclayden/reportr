@@ -98,7 +98,7 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
 # A recoverable condition carries a value for the signalling function to
 # return, which a handler may replace, and only such a condition can have an
 # error demoted. Returns the value that the signalling function should return
-.signal <- function (level, message, class = NULL, call = NULL, prefixFormat = NULL,
+.signal <- function (level, message, class = NULL, call = NULL, plain = FALSE,
                      value = NULL, recoverable = FALSE, outputLevel = .outputLevel(),
                      defer = FALSE, data = list())
 {
@@ -115,14 +115,14 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
     if (!recoverable)
         value <- NULL
     condition <- reportrCondition(level, message, class, call,
-                                  c(data, list(stack=sys.calls(), default=value, recoverable=recoverable)))
+                                  c(data, list(stack=sys.calls(), default=value, recoverable=recoverable, plain=plain)))
 
     body <- function () {
         signalCondition(condition)
         if (defer)
-            .bufferFlag(level, message, outputLevel)
+            .bufferFlag(level, message, outputLevel, condition)
         else
-            .report(level, message, prefixFormat, outputLevel, condition)
+            .report(level, message, plain, outputLevel, condition)
         value
     }
 

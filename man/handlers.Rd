@@ -23,7 +23,7 @@ handler functions. See Details.}
 }
 \value{
 \code{reportAs} and \code{withReportrHandlers} return the value of
-  \code{expr}. \code{reportrHandlers} returns \code{NULL}, invisibly.
+  \code{expr}, invisibly if it was invisible. \code{reportrHandlers} returns \code{NULL}, invisibly.
 }
 \description{
 These functions evaluate an expression in a context where conditions are

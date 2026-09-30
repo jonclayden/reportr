@@ -53,7 +53,7 @@
 #' @param install Should the session-wide handlers be installed, or removed?
 #'
 #' @return \code{reportAs} and \code{withReportrHandlers} return the value of
-#'   \code{expr}. \code{reportrHandlers} returns \code{NULL}, invisibly.
+#'   \code{expr}, invisibly if it was invisible. \code{reportrHandlers} returns \code{NULL}, invisibly.
 #'
 #' @examples
 #' setOutputLevel(OL$Info)
@@ -129,7 +129,7 @@ NULL
         # supply a different value
         value <- condition$default
         if (newLevel > OL$Ignore)
-            value <- .signal(newLevel, conditionMessage(condition), class=.userClasses(condition), call=conditionCall(condition), value=value, recoverable=isTRUE(condition$recoverable), data=list(original=condition))
+            value <- .signal(newLevel, conditionMessage(condition), class=.userClasses(condition), call=conditionCall(condition), plain=isTRUE(condition$plain), value=value, recoverable=isTRUE(condition$recoverable), data=list(original=condition))
 
         # Reaching this point means that nothing further out made the new
         # condition fatal, so a recoverable one resumes with its value, while
@@ -209,10 +209,16 @@ withReportrHandlers <- function (expr, ...)
     .Workspace$handlerDepth <- .handlerDepth() + 1L
     on.exit(.Workspace$handlerDepth <- .handlerDepth() - 1L)
 
-    result <- eval(as.call(c(list(quote(withCallingHandlers), quote(expr)), handlers)))
+    result <- withVisible(eval(as.call(c(list(quote(withCallingHandlers), quote(expr)), handlers))))
 
+    # Flags are reported before the result is returned, and the result keeps
+    # its visibility, so that wrapping an expression doesn't change what the
+    # console prints
     reportFlags()
-    return (result)
+    if (result$visible)
+        return (result$value)
+    else
+        return (invisible(result$value))
 }
 
 #' @rdname handlers

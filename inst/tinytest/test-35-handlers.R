@@ -64,3 +64,9 @@ if (at_home())
     expect_true(any(grepl("INFO: a plain message", output, fixed=TRUE)))
     expect_true(any(grepl("^untouched$", output)))
 }
+
+# Wrapping an expression doesn't change whether its result is visible
+expect_false(withVisible(withReportrHandlers(invisible(1)))$visible)
+expect_true(withVisible(withReportrHandlers(1))$visible)
+expect_false(withVisible(reportAs(invisible(1)))$visible)
+expect_true(withVisible(reportAs(1))$visible)

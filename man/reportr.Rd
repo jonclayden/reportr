@@ -17,9 +17,10 @@ setOutputLevel(level)
 
 getOutputLevel()
 
-ask(..., default = NULL, valid = NULL, prefixFormat = NULL)
+ask(..., default = NULL, valid = NULL, prefix = TRUE,
+  prefixFormat = NULL)
 
-report(level, ..., class = NULL, call = sys.call(-1),
+report(level, ..., class = NULL, call = sys.call(-1), prefix = TRUE,
   prefixFormat = NULL)
 
 flag(level, ..., class = NULL, call = sys.call(-1))
@@ -29,7 +30,7 @@ reportFlags()
 clearFlags()
 
 assert(expr, ..., class = NULL, level = OL$Error, call = sys.call(-1),
-  prefixFormat = NULL, envir = parent.frame())
+  prefix = TRUE, prefixFormat = NULL, envir = parent.frame())
 }
 \arguments{
 \item{level}{The level of output message to produce, or for
@@ -48,8 +49,11 @@ filtered out or the output level is above \code{Question}.}
 necessary, the question will be asked repeatedly until the user gives a
 suitable response. (Matching is not case-sensitive.)}
 
-\item{prefixFormat}{The format of the string prepended to the message. See
-Details.}
+\item{prefix}{Logical value: should the message be prefixed, according to
+the format for each output target? See Details.}
+
+\item{prefixFormat}{Deprecated. A value of \code{""} is equivalent to
+\code{prefix=FALSE}, and any other value is ignored with a warning.}
 
 \item{class}{A character vector of classes to attach to the condition, or
 \code{NULL}. A class derived from the level of the message, such as
@@ -150,21 +154,14 @@ The \code{withReportrHandlers} function evaluates \code{expr} in a context
 in which R errors, warnings and messages will be handled by reportr, rather
 than by the standard R functions. See \code{\link{handlers}}.
 
-The \code{prefixFormat} argument to \code{report} and \code{ask} controls
-how the output message is formatted. It takes the form of a
-\code{\link{sprintf}}-style format string, but with different expansions for
-percent-escapes. Specifically, \code{"\%d"} expands to a series of stars
-indicating the current stack depth; \code{"\%f"} gives the name of the
-function calling \code{report} or \code{ask}; \code{"\%l"} and \code{"\%L"}
-give lower and upper case versions of the level of the message,
-respectively; \code{"\%p"} expands to the ID of the current R process (see
-\code{\link{Sys.getpid}}); and \code{"\%t"} expands to the current time,
-formatted according to the \code{reportrTimeFormat} option. The default is
-\code{"\%d\%L: "}, giving a prefix such as \code{"* * INFO: "}, but this
-default can be overridden by setting the \code{reportrPrefixFormat} option.
-
-Messages are written to one or more destinations, which may include files as
-well as the terminal. See \code{\link{destinations}}.
+Messages are written to one or more output targets, which may include files
+as well as the terminal, and each of which formats messages with its own
+prefix. The default prefix is \code{"\%d\%L: "}, which gives a prefix such
+as \code{"* * INFO: "}, with one star for each level of the call stack at
+which the message arose. See \code{\link{targets}} for how to change it.
+Setting the \code{prefix} argument to \code{report}, \code{assert} or
+\code{ask} to \code{FALSE} writes that message without any prefix, to any
+target, which is useful for headings and other formatted output.
 
 A number of other options influence the output produced by reportr.
 \code{getOutputLevel} and \code{setOutputLevel} get and set the
@@ -196,8 +193,9 @@ report(OL$Info, "Hello, #{name}")}
 \seealso{
 \code{\link{fallback}} for errors which callers may demote;
   \code{\link{handlers}} for acting on classed messages;
-  \code{\link{reportrCondition}} for the condition objects themselves; and \code{\link{destinations}} for controlling where output
-  goes. \code{\link[ore]{es}} (in package \code{ore}) performs the
+  \code{\link{reportrCondition}} for the condition objects themselves; and
+  \code{\link{targets}} for controlling where output goes, and how it is
+  formatted. \code{\link[ore]{es}} (in package \code{ore}) performs the
   expression substitution applied to messages. \code{\link{message}},
   \code{\link{warning}}, \code{\link{stop}} and \code{\link{condition}} for
   the normal R message and condition-signalling framework.
