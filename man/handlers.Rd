@@ -16,64 +16,66 @@ reportrHandlers(install = TRUE)
 \arguments{
 \item{expr}{An expression to evaluate.}
 
-\item{\dots}{Named arguments mapping condition classes to levels, or to
+\item{...}{Named arguments mapping condition classes to levels, or to
 handler functions. See Details.}
 
 \item{install}{Should the session-wide handlers be installed, or removed?}
 }
 \value{
-\code{reportAs} and \code{withReportrHandlers} return the value of
-  \code{expr}, invisibly if it was invisible. \code{reportrHandlers} returns \code{NULL}, invisibly.
+\code{reportAs()} and \code{withReportrHandlers()} return the value of \code{expr},
+invisibly if it was invisible. \code{reportrHandlers()} returns \code{NULL},
+invisibly.
 }
 \description{
 These functions evaluate an expression in a context where conditions are
-handled by \code{reportr}. \code{reportAs} changes the level at which
-particular classes of condition are reported, which is how a caller decides
-how serious a situation is. \code{withReportrHandlers} additionally arranges
-for R's own messages, warnings and errors to be reported by \code{reportr},
-and \code{reportrHandlers} does the same for a whole session.
+handled by reportr. \code{reportAs()} changes the level at which particular
+classes of condition are reported, which is how a caller decides how serious
+a situation is. \code{withReportrHandlers()} additionally arranges for R's own
+messages, warnings and errors to be reported by reportr, and
+\code{reportrHandlers()} does the same for a whole session.
 }
 \details{
 Conditions to remap are given as named arguments, where the name is the
 class of condition to match and the value is the level at which it should be
 reported. Levels may be named in any of the usual ways, so \code{Error},
-\code{OL$Error} and \code{"Error"} are equivalent. Mapping a class to
-\code{Ignore} suppresses it entirely.
+\code{OL$Error} and \code{"Error"} are equivalent. Mapping a class to \code{Ignore}
+suppresses it entirely.
 
-\preformatted{    # A missing file is an error, as signalled ...
-    file <- locateFile(path)
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# A missing file is an error, as signalled ...
+file <- locateFile(path)
 
-    # ... but merely worth noting here
-    file <- reportAs(locateFile(path), missingFile=Debug)}
+# ... but merely worth noting here
+file <- reportAs(locateFile(path), missingFile=Debug)
+}\if{html}{\out{</div>}}
 
-Escalating a condition is always safe. Demoting one below \code{Error} is
-not, because code which signalled an error was generally not written to
-carry on afterwards. A demotion is therefore honoured only for conditions
-signalled by \code{\link{fallback}}, which supplies a value to continue
-with. Demoting any other error reports it at the requested level, but it
-remains fatal.
+Escalating a condition is always safe. Demoting one below \code{Error} is not,
+because code which signalled an error was generally not written to carry on
+afterwards. A demotion is therefore honoured only for conditions signalled
+by \code{\link[=fallback]{fallback()}}, which supplies a value to continue with. Demoting any other
+error reports it at the requested level, but it remains fatal.
 
 A named argument may also be a function, in which case it is used as a
 calling handler for that class of condition, exactly as it would be by
-\code{\link{withCallingHandlers}}. Such a handler may invoke the
-\code{muffleReport} restart, or for a condition signalled by
-\code{\link{fallback}} the \code{useValue} restart; see
-\code{\link{reportrCondition}}.
+\code{\link[=withCallingHandlers]{withCallingHandlers()}}. Such a handler may invoke the \code{muffleReport}
+restart, or for a condition signalled by \code{\link[=fallback]{fallback()}} the \code{useValue}
+restart; see \code{\link[=reportrCondition]{reportrCondition()}}.
+}
+\section{Handling R's own conditions}{
 
-\code{withReportrHandlers} also translates conditions raised by code which
-knows nothing of \code{reportr}: calls to \code{\link{message}} are reported
-at level \code{Info}, \code{\link{warning}} is flagged at level
-\code{Warning}, and \code{\link{stop}} is reported at level \code{Error}.
-The classes of the original condition are carried over to the \code{reportr}
-condition, and the original is stored in its \code{original} element, so a
-handler further out can still match it by class.
+\code{withReportrHandlers()} also translates conditions raised by code which
+knows nothing of reportr: calls to \code{\link[=message]{message()}} are reported at level \code{Info},
+\code{\link[=warning]{warning()}} is flagged at level \code{Warning}, and \code{\link[=stop]{stop()}} is reported at level
+\code{Error}. The classes of the original condition are carried over to the
+reportr condition, and the original is stored in its \code{original} element, so
+a handler further out can still match it by class.
 
-\code{reportrHandlers(TRUE)} installs those same translations for the rest
-of the session, using \code{\link{globalCallingHandlers}}, so that code need
-not be wrapped at all. Like that function, it may only be called when no
-handlers are already established, which in practice means at top level.
+\code{reportrHandlers(TRUE)} installs those same translations for the rest of the
+session, using \code{\link[=globalCallingHandlers]{globalCallingHandlers()}}, so that code need not be wrapped
+at all. Like that function, it may only be called when no handlers are
+already established, which in practice means at top level.
 \code{reportrHandlers(FALSE)} removes them again.
 }
+
 \examples{
 setOutputLevel(OL$Info)
 
@@ -94,9 +96,8 @@ withReportrHandlers(sqrt(-5:-1))
 
 }
 \seealso{
-\code{\link{report}} and \code{\link{fallback}} for signalling
-  these conditions, and
-  \code{\link{reportrCondition}} for their structure.
+\code{\link[=report]{report()}} and \code{\link[=fallback]{fallback()}} for signalling these conditions, and
+\code{\link[=reportrCondition]{reportrCondition()}} for their structure.
 }
 \author{
 Jon Clayden

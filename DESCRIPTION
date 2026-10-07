@@ -11,5 +11,6 @@ Encoding: UTF-8
 License: GPL-2
 URL: https://github.com/jonclayden/reportr
 BugReports: https://github.com/jonclayden/reportr/issues
-Roxygen: list(old_usage=TRUE)
 Config/roxygen2/version: 8.1.0
+Config/roxygen2/markdown: TRUE
+Config/roxygen2/old_usage: TRUE

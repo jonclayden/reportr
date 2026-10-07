@@ -21,13 +21,13 @@ getOutputTargets()
 }
 \arguments{
 \item{prefix}{The prefix format for messages written to this target. See
-Details.}
+the Prefixes section.}
 
-\item{stdout, stderr}{The minimum levels of message written to standard output
-and standard error, respectively. If \code{NULL}, all messages passing the
-master gate are written to standard output, and those at or above the
-level given by the \code{reportrStderrLevel} option (by default,
-\code{Warning}) are written to standard error instead.}
+\item{stdout, stderr}{The minimum levels of message written to standard
+output and standard error, respectively. If \code{NULL}, all messages passing
+the master gate are written to standard output, and those at or above the
+level given by the \code{reportrStderrLevel} option (by default, \code{Warning}) are
+written to standard error instead.}
 
 \item{file}{The path to a file, or a connection.}
 
@@ -41,9 +41,9 @@ than overwritten?}
 text, the level of the message, and the condition object (which may be
 \code{NULL}).}
 
-\item{\dots}{For \code{setOutputTargets}, target objects created by the
+\item{...}{For \code{setOutputTargets()}, target objects created by the
 constructor functions, or lists of them such as those returned by
-\code{getOutputTargets}. Arguments may be named, and otherwise a name is
+\code{getOutputTargets()}. Arguments may be named, and otherwise a name is
 chosen for each target. Giving no targets at all silences all output,
 unless \code{add} is \code{TRUE}.}
 
@@ -51,52 +51,58 @@ unless \code{add} is \code{TRUE}.}
 current ones, rather than replacing them.}
 }
 \value{
-\code{setOutputTargets} invisibly returns the targets which were in
-  effect before the call, so that they can be restored later.
-  \code{getOutputTargets} returns a named list of the current targets. The
-  constructors return a single target object.
+\code{setOutputTargets()} invisibly returns the targets which were in
+effect before the call, so that they can be restored later.
+\code{getOutputTargets()} returns a named list of the current targets. The
+constructors return a single target object.
 }
 \description{
 Messages accepted for reporting are written to one or more output targets,
 which may be the terminal, files, connections or arbitrary functions. By
 default there is a single target, which writes to the terminal.
-\code{setOutputTargets} replaces the current targets with those given, and
-\code{getOutputTargets} returns them.
+\code{setOutputTargets()} replaces the current targets with those given, or adds
+to them, and \code{getOutputTargets()} returns them. \code{toTerminal()}, \code{toFile()}
+and \code{toFunction()} create targets.
 }
 \details{
-The current output level (see \code{\link{setOutputLevel}}) is the master
-gate: a message which it suppresses never reaches any target. A target may
+The current output level (see \code{\link[=setOutputLevel]{setOutputLevel()}}) is the master gate: a
+message which it suppresses never reaches any target. A target may
 additionally set its own level threshold, so that, for example, a log file
 captures everything from \code{Debug} upwards while the terminal shows only
-\code{Info} and above. A threshold of \code{NULL}, the default, accepts
-every message which passes the master gate.
+\code{Info} and above. A threshold of \code{NULL}, the default, accepts every message
+which passes the master gate. Levels may be named in any of the usual ways,
+so \code{Info}, \code{OL$Info} and \code{"Info"} are equivalent.
 
-The terminal target writes messages below its \code{stderr} level to
-standard output, and the rest to standard error. Levels given to the
-constructors may be named in any of the usual ways, so \code{Info},
-\code{OL$Info} and \code{"Info"} are equivalent.
-
-Each target has its own prefix format, which describes the string prepended
-to each message. It takes the form of a \code{\link{sprintf}}-style format
-string, but with different expansions for percent-escapes. Specifically,
-\code{"\%d"} expands to a series of stars indicating the stack depth at which
-the message arose; \code{"\%f"} gives the name of the function which raised
-it; \code{"\%l"} and \code{"\%L"} give lower and upper case versions of the
-level of the message, respectively; \code{"\%p"} expands to the ID of the
-current R process (see \code{\link{Sys.getpid}}); and \code{"\%t"} expands to
-the current time, formatted according to the \code{reportrTimeFormat}
-option. A prefix of \code{NULL}, the default, uses the value of the
-\code{reportrPrefixFormat} option at the time the message is written, whose
-own default is \code{"\%d\%L: "}, giving a prefix such as
-\code{"* * INFO: "}. A prefix of \code{FALSE} or \code{""} means no prefix.
-Individual messages can be written without any prefix, whatever the target,
-using the \code{prefix} argument to \code{\link{report}}.
+The terminal target writes messages below its \code{stderr} level to standard
+output, and the rest to standard error.
 
 Files named by path are opened when they are first written to, and closed
-when a call to \code{setOutputTargets} no longer includes them. Connections
-passed to \code{toFile} are used as they are, and never closed by
-\code{reportr}.
+when a call to \code{setOutputTargets()} no longer includes them. Connections
+passed to \code{toFile()} are used as they are, and never closed by reportr.
 }
+\section{Prefixes}{
+
+Each target has its own prefix format, which describes the string prepended
+to each message. It takes the form of a \code{\link[=sprintf]{sprintf()}}-style format string, but
+with different expansions for percent-escapes:
+\itemize{
+\item \verb{\%d} expands to a series of stars indicating the stack depth at which the
+message arose;
+\item \verb{\%f} gives the name of the function which raised the message;
+\item \verb{\%l} and \verb{\%L} give lower and upper case versions of the level of the
+message;
+\item \verb{\%p} expands to the ID of the current R process (see \code{\link[=Sys.getpid]{Sys.getpid()}}); and
+\item \verb{\%t} expands to the current time, formatted according to the
+\code{reportrTimeFormat} option.
+}
+
+A prefix of \code{NULL}, the default, uses the value of the \code{reportrPrefixFormat}
+option at the time the message is written, whose own default is \code{"\%d\%L: "},
+giving a prefix such as \code{"* * INFO: "}. A prefix of \code{FALSE} or \code{""} means no
+prefix. Individual messages can be written without any prefix, whatever the
+target, using the \code{prefix} argument to \code{\link[=report]{report()}}.
+}
+
 \examples{
 \dontrun{
 # Log everything to a file, while the terminal shows warnings and above
@@ -113,7 +119,7 @@ setOutputTargets(old)
 
 }
 \seealso{
-\code{\link{report}} and \code{\link{setOutputLevel}}
+\code{\link[=report]{report()}} and \code{\link[=setOutputLevel]{setOutputLevel()}}
 }
 \author{
 Jon Clayden

@@ -1,70 +1,143 @@
+#' The output level
+#'
+#' The output level is the master gate for reported messages: a message whose
+#' level is below it is not written to any output target. `setOutputLevel()`
+#' sets it, and `getOutputLevel()` returns it.
+#'
+#' The output level is stored in the `reportrOutputLevel` option, which may
+#' also be set directly. If a message is reported before the output level has
+#' been set, it is set to `Info`, with a message to say so.
+#'
+#' The output level governs only what is written. Errors are fatal whatever the
+#' output level, and the conditions corresponding to messages which are not
+#' written are still signalled when they have a class, or when handlers
+#' established by [reportAs()] or [withReportrHandlers()] are active. At level
+#' `Debug`, a stack trace is also written with any message at or above the
+#' level given by the `reportrStackTraceLevel` option. Output targets may apply
+#' stricter thresholds of their own; see [targets].
+#'
+#' @param level The minimum level of message to write. Levels may be named in
+#'   any of the usual ways, so `Info`, `OL$Info` and `"Info"` are equivalent;
+#'   see [reportr] for the full list. Levels outside the range `Debug` to
+#'   `Fatal` are ignored.
+#'
+#' @return `setOutputLevel()` returns `NULL`, invisibly. `getOutputLevel()`
+#'   returns the current output level, as an integer named after the level.
+#'
+#' @examples
+#' setOutputLevel(Warning)
+#' getOutputLevel()
+#' report(Info, "Not written")
+#'
+#' setOutputLevel(OL$Info)
+#' report(Info, "Written")
+#'
+#' @seealso [report()], and [targets] for controlling where messages are
+#'   written.
+#' @author Jon Clayden
+#' @export
+setOutputLevel <- function (level)
+{
+    level <- .evaluateLevel(level)
+    if (level %in% OL$Debug:OL$Fatal)
+        options(reportrOutputLevel=level)
+    invisible(NULL)
+}
+
+#' @rdname setOutputLevel
+#' @export
+getOutputLevel <- function ()
+{
+    level <- .outputLevel()
+    names(level) <- names(which(OL == level))
+    return (level)
+}
+
+# The output level as a bare integer. This is on the fast path taken by every
+# call to report(), including the many which produce no output, so it avoids
+# the cost of naming the result
+.outputLevel <- function ()
+{
+    level <- getOption("reportrOutputLevel")
+    if (is.null(level))
+    {
+        setOutputLevel(OL$Info)
+        .report(OL$Info, "Output level is not set; defaulting to \"Info\"", plain=TRUE, outputLevel=OL$Info)
+        level <- OL$Info
+    }
+    return (level)
+}
+
 #' Output targets
 #'
 #' Messages accepted for reporting are written to one or more output targets,
 #' which may be the terminal, files, connections or arbitrary functions. By
 #' default there is a single target, which writes to the terminal.
-#' \code{setOutputTargets} replaces the current targets with those given, and
-#' \code{getOutputTargets} returns them.
+#' `setOutputTargets()` replaces the current targets with those given, or adds
+#' to them, and `getOutputTargets()` returns them. `toTerminal()`, `toFile()`
+#' and `toFunction()` create targets.
 #'
-#' The current output level (see \code{\link{setOutputLevel}}) is the master
-#' gate: a message which it suppresses never reaches any target. A target may
+#' The current output level (see [setOutputLevel()]) is the master gate: a
+#' message which it suppresses never reaches any target. A target may
 #' additionally set its own level threshold, so that, for example, a log file
-#' captures everything from \code{Debug} upwards while the terminal shows only
-#' \code{Info} and above. A threshold of \code{NULL}, the default, accepts
-#' every message which passes the master gate.
+#' captures everything from `Debug` upwards while the terminal shows only
+#' `Info` and above. A threshold of `NULL`, the default, accepts every message
+#' which passes the master gate. Levels may be named in any of the usual ways,
+#' so `Info`, `OL$Info` and `"Info"` are equivalent.
 #'
-#' The terminal target writes messages below its \code{stderr} level to
-#' standard output, and the rest to standard error. Levels given to the
-#' constructors may be named in any of the usual ways, so \code{Info},
-#' \code{OL$Info} and \code{"Info"} are equivalent.
-#'
-#' Each target has its own prefix format, which describes the string prepended
-#' to each message. It takes the form of a \code{\link{sprintf}}-style format
-#' string, but with different expansions for percent-escapes. Specifically,
-#' \code{"\%d"} expands to a series of stars indicating the stack depth at which
-#' the message arose; \code{"\%f"} gives the name of the function which raised
-#' it; \code{"\%l"} and \code{"\%L"} give lower and upper case versions of the
-#' level of the message, respectively; \code{"\%p"} expands to the ID of the
-#' current R process (see \code{\link{Sys.getpid}}); and \code{"\%t"} expands to
-#' the current time, formatted according to the \code{reportrTimeFormat}
-#' option. A prefix of \code{NULL}, the default, uses the value of the
-#' \code{reportrPrefixFormat} option at the time the message is written, whose
-#' own default is \code{"\%d\%L: "}, giving a prefix such as
-#' \code{"* * INFO: "}. A prefix of \code{FALSE} or \code{""} means no prefix.
-#' Individual messages can be written without any prefix, whatever the target,
-#' using the \code{prefix} argument to \code{\link{report}}.
+#' The terminal target writes messages below its `stderr` level to standard
+#' output, and the rest to standard error.
 #'
 #' Files named by path are opened when they are first written to, and closed
-#' when a call to \code{setOutputTargets} no longer includes them. Connections
-#' passed to \code{toFile} are used as they are, and never closed by
-#' \code{reportr}.
+#' when a call to `setOutputTargets()` no longer includes them. Connections
+#' passed to `toFile()` are used as they are, and never closed by reportr.
 #'
-#' @param \dots For \code{setOutputTargets}, target objects created by the
+#' @section Prefixes:
+#' Each target has its own prefix format, which describes the string prepended
+#' to each message. It takes the form of a [sprintf()]-style format string, but
+#' with different expansions for percent-escapes:
+#'
+#' * `%d` expands to a series of stars indicating the stack depth at which the
+#'   message arose;
+#' * `%f` gives the name of the function which raised the message;
+#' * `%l` and `%L` give lower and upper case versions of the level of the
+#'   message;
+#' * `%p` expands to the ID of the current R process (see [Sys.getpid()]); and
+#' * `%t` expands to the current time, formatted according to the
+#'   `reportrTimeFormat` option.
+#'
+#' A prefix of `NULL`, the default, uses the value of the `reportrPrefixFormat`
+#' option at the time the message is written, whose own default is `"%d%L: "`,
+#' giving a prefix such as `"* * INFO: "`. A prefix of `FALSE` or `""` means no
+#' prefix. Individual messages can be written without any prefix, whatever the
+#' target, using the `prefix` argument to [report()].
+#'
+#' @param ... For `setOutputTargets()`, target objects created by the
 #'   constructor functions, or lists of them such as those returned by
-#'   \code{getOutputTargets}. Arguments may be named, and otherwise a name is
+#'   `getOutputTargets()`. Arguments may be named, and otherwise a name is
 #'   chosen for each target. Giving no targets at all silences all output,
-#'   unless \code{add} is \code{TRUE}.
-#' @param add Logical value: if \code{TRUE}, the targets given are added to the
+#'   unless `add` is `TRUE`.
+#' @param add Logical value: if `TRUE`, the targets given are added to the
 #'   current ones, rather than replacing them.
 #' @param prefix The prefix format for messages written to this target. See
-#'   Details.
-#' @param stdout,stderr The minimum levels of message written to standard output
-#'   and standard error, respectively. If \code{NULL}, all messages passing the
-#'   master gate are written to standard output, and those at or above the
-#'   level given by the \code{reportrStderrLevel} option (by default,
-#'   \code{Warning}) are written to standard error instead.
+#'   the Prefixes section.
+#' @param stdout,stderr The minimum levels of message written to standard
+#'   output and standard error, respectively. If `NULL`, all messages passing
+#'   the master gate are written to standard output, and those at or above the
+#'   level given by the `reportrStderrLevel` option (by default, `Warning`) are
+#'   written to standard error instead.
 #' @param file The path to a file, or a connection.
 #' @param level The minimum level of message which this target will accept, or
-#'   \code{NULL} to accept any which passes the master gate.
-#' @param append If \code{file} is a path, should the file be appended to rather
+#'   `NULL` to accept any which passes the master gate.
+#' @param append If `file` is a path, should the file be appended to rather
 #'   than overwritten?
 #' @param fun A function, which is called with three arguments: the formatted
 #'   text, the level of the message, and the condition object (which may be
-#'   \code{NULL}).
+#'   `NULL`).
 #'
-#' @return \code{setOutputTargets} invisibly returns the targets which were in
+#' @return `setOutputTargets()` invisibly returns the targets which were in
 #'   effect before the call, so that they can be restored later.
-#'   \code{getOutputTargets} returns a named list of the current targets. The
+#'   `getOutputTargets()` returns a named list of the current targets. The
 #'   constructors return a single target object.
 #'
 #' @examples
@@ -81,7 +154,7 @@
 #' setOutputTargets(old)
 #' }
 #'
-#' @seealso \code{\link{report}} and \code{\link{setOutputLevel}}
+#' @seealso [report()] and [setOutputLevel()]
 #' @author Jon Clayden
 #' @name targets
 NULL
