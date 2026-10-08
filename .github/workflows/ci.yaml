@@ -19,9 +19,10 @@ jobs:
     # The type of runner that this job runs on
     runs-on: ${{ matrix.os }}
     
-    # Run non-CRAN-friendly tests
+    # Run non-CRAN-friendly tests, don't error if covr isn't available
     env:
       TT_AT_HOME: 'TRUE'
+      _R_CHECK_FORCE_SUGGESTS_: 'FALSE'
     
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
