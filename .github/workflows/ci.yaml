@@ -64,7 +64,7 @@ jobs:
         path: Rcheck
     
     - name: Update test coverage
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.R == 'release'
       run: Rscript -e 'covr::codecov()'
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
