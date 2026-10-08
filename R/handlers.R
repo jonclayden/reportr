@@ -44,7 +44,9 @@
 #' `reportrHandlers(TRUE)` installs those same translations for the rest of the
 #' session, using [globalCallingHandlers()], so that code need not be wrapped
 #' at all. Like that function, it may only be called when no handlers are
-#' already established, which in practice means at top level.
+#' already established, which in practice means at top level. It requires
+#' R 4.0.0 or later, and gives an error on earlier versions; the rest of the
+#' package works with R 3.5.0 or later.
 #' `reportrHandlers(FALSE)` removes them again.
 #'
 #' @param expr An expression to evaluate.
@@ -225,6 +227,9 @@ withReportrHandlers <- function (expr, ...)
 #' @export
 reportrHandlers <- function (install = TRUE)
 {
+    if (getRversion() < "4.0.0")
+        stop("reportrHandlers() requires R >= 4.0.0")
+
     ours <- list(.messageHandler, .warningHandler, .errorHandler)
 
     if (isTRUE(install))

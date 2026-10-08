@@ -18,7 +18,8 @@ VERSION 2.0.0
   it has detected.
 - withReportrHandlers() now also accepts named arguments mapping condition
   classes to levels or to handler functions, and reportrHandlers() installs the
-  same translations for a whole session using globalCallingHandlers().
+  same translations for a whole session using globalCallingHandlers(), which
+  requires R 4.0.0 or later. The package itself needs only R 3.5.0.
 - Messages can now be sent to files, connections and functions as well as, or
   instead of, the terminal. See ?destinations. The new "%t" prefix escape
   expands to the current time.

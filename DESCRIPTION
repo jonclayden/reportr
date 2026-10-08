@@ -3,7 +3,7 @@ Version: 2.0.0
 Date: 2026-08-11
 Title: A General Message and Error Reporting System
 Authors@R: person("Jon", "Clayden", email="code@clayden.org", role=c("aut","cre"), comment=c(ORCID="0000-0002-6608-0619"))
-Depends: R (>= 4.0.0)
+Depends: R (>= 3.5.0)
 Imports: ore
 Suggests: tinytest, covr
 Description: Provides a system for reporting messages, which provides certain useful features over the standard R system, such as the incorporation of output consolidation, message filtering, assertions, expression substitution, automatic generation of stack traces for debugging, and conditional reporting based on the current "output level". Messages are signalled as classed R conditions, so that calling code can decide how serious a situation is, rather than the function which detects it having to be told in advance.

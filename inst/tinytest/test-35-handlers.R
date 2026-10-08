@@ -43,7 +43,7 @@ expect_stdout(reportFlags(), "WARNING: deferred", fixed=TRUE)
 # Session-wide handlers can be installed and removed again. This has to happen
 # in a subprocess, because globalCallingHandlers() may only be called when no
 # handlers are already established, which is not true under the test runner
-if (at_home())
+if (at_home() && getRversion() >= "4.0.0")
 {
     script <- tempfile(fileext=".R")
     writeLines(c(sprintf(".libPaths(%s)", paste(deparse(.libPaths()),collapse="")),
