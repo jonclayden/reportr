@@ -70,7 +70,7 @@ reportr condition, and the original is stored in its \code{original} element, so
 a handler further out can still match it by class.
 
 \code{reportrHandlers(TRUE)} installs those same translations for the rest of the
-session, using \code{\link[=globalCallingHandlers]{globalCallingHandlers()}}, so that code need not be wrapped
+session, using \code{globalCallingHandlers()}, so that code need not be wrapped
 at all. Like that function, it may only be called when no handlers are
 already established, which in practice means at top level. It requires
 R 4.0.0 or later, and gives an error on earlier versions; the rest of the
@@ -82,9 +82,9 @@ package works with R 3.5.0 or later.
 setOutputLevel(OL$Info)
 
 findThing <- function (name) {
-    if (name != "widget")
-        return(fallback(NA, "There is no #{name}", class="missingThing"))
-    return("the widget")
+  if (name != "widget")
+    return(fallback(NA, "There is no #{name}", class="missingThing"))
+  return("the widget")
 }
 
 # Reported as a warning, rather than an error

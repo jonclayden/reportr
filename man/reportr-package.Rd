@@ -34,8 +34,8 @@ questions.
 \item \code{\link[=fallback]{fallback()}} raises an error which the caller may choose to demote, in
 return for a substitute value.
 \item \code{\link[=reportAs]{reportAs()}} changes the level of particular classes of message, and
-\code{\link[=withReportrHandlers]{withReportrHandlers()}} brings R's own messages, warnings and errors under
-reportr's control. See \link{handlers}.
+\code{\link[=withReportrHandlers]{withReportrHandlers()}} brings all of R's messages, warnings and errors
+under reportr's control. See \link{handlers}.
 \item \code{\link[=setOutputLevel]{setOutputLevel()}} controls which messages are written, and
 \code{\link[=setOutputTargets]{setOutputTargets()}} where they are written and how they are formatted.
 See \link{targets}.
@@ -66,7 +66,7 @@ expressions. If set, only messages which match the first, and do not
 match the second, are reported. Filtering affects only what is reported:
 the corresponding condition is signalled either way, and a filtered error
 is still fatal.
-\item \code{reportrBaseClasses}: Should reportr conditions also inherit from R's own
+\item \code{reportrBaseClasses}: Should reportr conditions also inherit from base R's
 \code{"message"} and \code{"warning"} classes? The default is \code{FALSE}; see
 \code{\link[=reportrCondition]{reportrCondition()}}.
 }

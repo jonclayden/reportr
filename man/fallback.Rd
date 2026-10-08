@@ -44,9 +44,9 @@ Instead, the function can signal a classed condition, and supply the value
 it would return if the caller decides that execution should continue:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{locateFile <- function (path) \{
-    if (!file.exists(path))
-        return(fallback(NULL, "File #\{path\} does not exist", class="missingFile"))
-    ...
+  if (!file.exists(path))
+    return(fallback(NULL, "File #\{path\} does not exist", class="missingFile"))
+  ...
 \}
 }\if{html}{\out{</div>}}
 
@@ -81,9 +81,9 @@ when the current output level means that nothing will be reported.
 setOutputLevel(OL$Info)
 
 findThing <- function (name) {
-    if (name != "widget")
-        return(fallback(NA, "There is no #{name}", class="missingThing"))
-    return("the widget")
+  if (name != "widget")
+    return(fallback(NA, "There is no #{name}", class="missingThing"))
+  return("the widget")
 }
 
 # An error, if the caller does nothing
