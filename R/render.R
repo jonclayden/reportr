@@ -268,6 +268,8 @@ setOutputTargets <- function (..., add = FALSE)
     # Close any files which are no longer targets
     paths <- unlist(lapply(targets, function (target) if (target$type == "file" && is.character(target$file)) target$file))
     connections <- .Workspace$connections
+    if (is.null(connections))
+        connections <- list()
     for (path in setdiff(names(connections), paths))
     {
         try(close(connections[[path]]), silent=TRUE)
@@ -297,6 +299,8 @@ getOutputTargets <- function ()
     {
         connection <- file(target$file, open=ifelse(target$append,"at","wt"))
         connections <- .Workspace$connections
+        if (is.null(connections))
+            connections <- list()
         connections[[target$file]] <- connection
         .Workspace$connections <- connections
     }
