@@ -80,6 +80,10 @@
 #' # Suppressed entirely
 #' reportAs(findThing("sprocket"), missingThing=Ignore)
 #'
+#' # Suppressed, with a different value supplied through the useValue restart
+#' reportAs(findThing("sprocket"),
+#'          missingThing=function (cond) invokeRestart("useValue", "a sprocket"))
+#'
 #' @seealso [reportAs()] for acting on these conditions, [reportrCondition()]
 #'   for the structure of the condition objects, and [report()] for conditions
 #'   which are only reported.

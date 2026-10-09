@@ -66,6 +66,22 @@ cond <- reportrCondition(OL$Warning, "Something is amiss", class="myWarning")
 class(cond)
 conditionMessage(cond)
 
+# A handler can recover from an error raised by fallback(), and provide a
+# value of its own for the signalling function to return
+lookup <- function (key) {
+  if (key != "a")
+    return(fallback(NULL, "No value for key #{key}", class="missingKey"))
+  return(1)
+}
+withCallingHandlers(lookup("b"), missingKey=function (cond) {
+  if (cond$recoverable)
+    invokeRestart("useValue", 0)
+})
+
+# Other conditions can only be muffled, which suppresses the message
+withCallingHandlers(report(Warning, "Not shown"),
+                    reportrWarning=function (cond) invokeRestart("muffleReport"))
+
 }
 \seealso{
 \code{\link[=report]{report()}} and \code{\link[=fallback]{fallback()}} for signalling conditions, \code{\link[=reportAs]{reportAs()}}

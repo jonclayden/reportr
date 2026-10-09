@@ -95,6 +95,10 @@ reportAs(findThing("sprocket"), missingThing=Warning)
 # Suppressed entirely
 reportAs(findThing("sprocket"), missingThing=Ignore)
 
+# Suppressed, with a different value supplied through the useValue restart
+reportAs(findThing("sprocket"),
+         missingThing=function (cond) invokeRestart("useValue", "a sprocket"))
+
 }
 \seealso{
 \code{\link[=reportAs]{reportAs()}} for acting on these conditions, \code{\link[=reportrCondition]{reportrCondition()}}
