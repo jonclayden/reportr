@@ -210,16 +210,11 @@ print.reportrTarget <- function (x, ...)
     invisible(x)
 }
 
-.defaultTargets <- function ()
-{
-    list(terminal=toTerminal())
-}
-
 .targets <- function ()
 {
     targets <- .Workspace$targets
     if (is.null(targets))
-        targets <- .defaultTargets()
+        targets <- list(terminal=toTerminal())
     return (targets)
 }
 
@@ -378,30 +373,6 @@ getOutputTargets <- function ()
     }
 }
 
-.buildStackTrace <- function (calls = sys.calls())
-{
-    stack <- .getCallStack(calls)
-    if (length(stack) == 0)
-        return ("")
-
-    depths <- sapply(seq_along(stack), function(i) paste(rep("* ",i),collapse=""))
-    paste("--- Begin stack trace ---\n",
-          paste(depths, stack, "\n", sep="", collapse=""),
-          "---  End stack trace  ---\n", sep="")
-}
-
-# The prefix format used by the terminal, for output which doesn't pass
-# through the targets, such as questions
-.terminalPrefix <- function ()
-{
-    for (target in .targets())
-    {
-        if (target$type == "terminal")
-            return (target$prefix)
-    }
-    return (NULL)
-}
-
 # Write a message which is already in its final form to each target which
 # accepts it. The output level has already been checked by this point. The
 # stack is taken from the condition where possible, since a flagged message
@@ -416,7 +387,16 @@ getOutputTargets <- function ()
 
     trace <- ""
     if (outputLevel == OL$Debug && level >= .resolveOption("reportrStackTraceLevel"))
-        trace <- .buildStackTrace(calls)
+    {
+        stack <- .getCallStack(calls)
+        if (length(stack) > 0)
+        {
+            depths <- sapply(seq_along(stack), function(i) paste(rep("* ",i),collapse=""))
+            trace <- paste("--- Begin stack trace ---\n",
+                           paste(depths, stack, "\n", sep="", collapse=""),
+                           "---  End stack trace  ---\n", sep="")
+        }
+    }
 
     for (target in targets)
     {

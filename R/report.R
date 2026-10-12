@@ -84,9 +84,16 @@ ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat 
     else
     {
         reportFlags()
+
+        # Questions don't pass through the targets, so they use the terminal's
+        # prefix format, if there is a terminal target
+        if (prefix)
+            prefix <- .buildPrefix(OL$Question, Find(function (target) target$type == "terminal", .targets())$prefix)
+        else
+            prefix <- ""
         repeat
         {
-            ans <- .readline(paste(if (prefix) .buildPrefix(OL$Question,.terminalPrefix()) else "", message, " ", sep=""))
+            ans <- .readline(paste(prefix, message, " ", sep=""))
             if (is.null(valid))
                 return (ans)
             else
@@ -237,8 +244,8 @@ report <- function (level, ..., class = NULL, call = sys.call(-1), prefix = TRUE
     # The fast path: nothing will be reported, so unless the message is fatal
     # or something is listening for it, there is no need to build it at all. A
     # classed condition is always signalled, since the class is there for the
-    # benefit of callers
-    if (outputLevel > level && level < OL$Error && is.null(class) && !.handlersActive())
+    # benefit of callers, as is any condition while reportr handlers are active
+    if (outputLevel > level && level < OL$Error && is.null(class) && .handlerDepth() == 0L)
         return (invisible(NULL))
 
     message <- .buildMessage(..., .envir=parent.frame())

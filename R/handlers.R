@@ -88,22 +88,6 @@ NULL
     if (is.null(depth)) 0L else depth
 }
 
-# The classes of a condition which came from its signaller, rather than from
-# its level or from R itself. These are carried over when a condition is
-# re-signalled at a different level, so that outer handlers still match it
-.userClasses <- function (condition)
-{
-    setdiff(class(condition), c(paste("reportr",names(OL),sep=""), "reportrCondition", "error", "warning", "message", "condition"))
-}
-
-.resolveLevel <- function (value)
-{
-    if (is.character(value) && length(value) == 1L && value %in% names(OL))
-        return (OL[[value]])
-    else
-        return (value)
-}
-
 # Build a calling handler which reports a condition at a different level from
 # the one it was signalled at
 .remapHandler <- function (newLevel)
@@ -128,10 +112,15 @@ NULL
         # Reporting at level Ignore means reporting nothing at all. Otherwise
         # the condition is signalled afresh, keeping its value and whether it
         # is recoverable, so that a handler further out can remap it again or
-        # supply a different value
+        # supply a different value. Classes which came from the signaller,
+        # rather than from the level or from R itself, are carried over so
+        # that outer handlers still match it
         value <- condition$default
         if (newLevel > OL$Ignore)
-            value <- .signal(newLevel, conditionMessage(condition), class=.userClasses(condition), call=conditionCall(condition), plain=isTRUE(condition$plain), value=value, recoverable=isTRUE(condition$recoverable), data=list(original=condition))
+        {
+            userClasses <- setdiff(class(condition), c(paste("reportr",names(OL),sep=""), "reportrCondition", "error", "warning", "message", "condition"))
+            value <- .signal(newLevel, conditionMessage(condition), class=userClasses, call=conditionCall(condition), plain=isTRUE(condition$plain), value=value, recoverable=isTRUE(condition$recoverable), data=list(original=condition))
+        }
 
         # Reaching this point means that nothing further out made the new
         # condition fatal, so a recoverable one resumes with its value, while
@@ -161,7 +150,7 @@ NULL
         if (is.function(value))
             return (value)
         else
-            return (.remapHandler(.resolveLevel(value)))
+            return (.remapHandler(.evaluateLevel(value, NULL)))
     })
 }
 

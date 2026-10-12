@@ -98,15 +98,6 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
     setdiff(class(condition), c("simpleError","simpleWarning","simpleMessage","simpleCondition","error","warning","message","condition"))
 }
 
-# TRUE if any reportr-managed handlers are currently established. Used to
-# decide whether a message which will not be reported is nevertheless worth
-# signalling, since a condition that nothing can observe is not worth building
-.handlersActive <- function ()
-{
-    depth <- .Workspace$handlerDepth
-    !is.null(depth) && depth > 0L
-}
-
 # The core of the package: signal a condition for a message which is already in
 # its final form, report it if nothing intervenes, and abort if it is an error.
 # A recoverable condition carries a value for the signalling function to
