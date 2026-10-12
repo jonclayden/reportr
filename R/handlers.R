@@ -169,20 +169,30 @@ reportAs <- function (expr, ...)
     eval(as.call(c(list(quote(withCallingHandlers), quote(expr)), handlers)))
 }
 
+# These handlers translate conditions raised outside reportr. A reportr
+# condition can also match them, since errors (and, depending on the
+# reportrBaseClasses option, warnings and messages) inherit from a base class,
+# but it has already been signalled and will be reported in its own right
 .messageHandler <- function (m)
 {
+    if (inherits(m, "reportrCondition"))
+        return (invisible(NULL))
     .signal(OL$Info, ore.subst("\n$","",m$message), class=.foreignClasses(m), call=m$call, data=list(original=m))
     invokeRestart("muffleMessage")
 }
 
 .warningHandler <- function (w)
 {
+    if (inherits(w, "reportrCondition"))
+        return (invisible(NULL))
     .signal(OL$Warning, w$message, class=.foreignClasses(w), call=w$call, defer=TRUE, data=list(original=w))
     invokeRestart("muffleWarning")
 }
 
 .errorHandler <- function (e)
 {
+    if (inherits(e, "reportrCondition"))
+        return (invisible(NULL))
     if (is.null(e$call))
         message <- e$message
     else

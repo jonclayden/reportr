@@ -131,20 +131,25 @@ reportrCondition <- function (level, message, class = NULL, call = NULL, data = 
         value
     }
 
-    # The useValue restart is only offered for recoverable conditions, since
-    # code which did not say what to continue with is not safe to resume
+    # A condition with a base class can also be muffled through the standard
+    # restarts used by suppressWarnings() and suppressMessages(). These are
+    # only invoked by handlers for the corresponding class, so they are
+    # harmless for conditions without one. The useValue restart is only
+    # offered for recoverable conditions, since code which did not say what to
+    # continue with is not safe to resume
     recovered <- FALSE
+    muffle <- function () value
     if (recoverable)
     {
         result <- withRestarts(body(),
-            muffleReport=function () value,
+            muffleReport=muffle, muffleWarning=muffle, muffleMessage=muffle,
             useValue=function (newValue) {
                 recovered <<- TRUE
                 newValue
             })
     }
     else
-        result <- withRestarts(body(), muffleReport=function () value)
+        result <- withRestarts(body(), muffleReport=muffle, muffleWarning=muffle, muffleMessage=muffle)
 
     if (!recovered && fatal)
         invokeRestart("abort")

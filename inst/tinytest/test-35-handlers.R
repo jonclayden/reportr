@@ -70,3 +70,24 @@ expect_false(withVisible(withReportrHandlers(invisible(1)))$visible)
 expect_true(withVisible(withReportrHandlers(1))$visible)
 expect_false(withVisible(reportAs(invisible(1)))$visible)
 expect_true(withVisible(reportAs(1))$visible)
+
+# reportr's own errors pass through the translation handlers untouched, so an
+# outer handler sees the original condition rather than a re-signalled copy
+f <- function () report(Error, "boom", class="myErr")
+cond <- tryCatch(withReportrHandlers(f()), myErr=function(cond) cond)
+expect_equal(conditionMessage(cond), "boom")
+expect_equal(class(cond), c("myErr","reportrError","reportrCondition","error","condition"))
+
+# With base classes, the standard suppression functions work on reportr
+# conditions, and reportr's own warnings and messages pass through the
+# translation handlers without error
+options(reportrBaseClasses=TRUE)
+expect_silent(suppressWarnings(report(Warning, "hidden")))
+expect_silent(suppressMessages(report(Info, "hidden")))
+expect_silent(suppressWarnings(flag(Warning, "hidden")))
+expect_silent(reportFlags())
+expect_stdout(withReportrHandlers(report(Warning, "own warning")), "WARNING: own warning", fixed=TRUE)
+expect_stdout(withReportrHandlers(report(Info, "own message")), "INFO: own message", fixed=TRUE)
+options(reportrBaseClasses=FALSE)
+expect_stdout(suppressWarnings(report(Warning, "shown")), "WARNING: shown", fixed=TRUE)
+expect_stdout(suppressMessages(report(Info, "shown")), "INFO: shown", fixed=TRUE)
