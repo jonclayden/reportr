@@ -6,11 +6,12 @@
 #' case the substitute value is returned and execution continues.
 #'
 #' Often only the caller knows how serious a problem is: a missing file may be
-#' fatal in one context and unremarkable in another. The usual workaround is a
-#' logical argument such as `errorIfMissing`, but that puts the decision in the
-#' wrong place, and has to be passed down through every intervening layer.
-#' Instead, the function can signal a classed condition, and supply the value
-#' it would return if the caller decides that execution should continue:
+#' fatal in one context and unremarkable in another. One workaround is a
+#' logical argument indicating whether a certain condition should be raised as
+#' an error, but that puts the decision in the wrong place, and has to be
+#' passed down through every intervening layer. Instead, the function can
+#' signal a classed condition, and supply the value it would return if the
+#' caller decides that execution should continue:
 #'
 #' ```
 #' locateFile <- function (path) {

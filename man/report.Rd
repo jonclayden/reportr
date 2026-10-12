@@ -27,9 +27,10 @@ ask(..., default = NULL, valid = NULL, prefix = TRUE,
 \arguments{
 \item{level}{The level of the message. See Details.}
 
-\item{...}{Objects which can be coerced to mode \code{character}. These are pasted
-together and passed through \code{\link[ore:es]{ore::es()}} for expression substitution.
-Arguments to \code{\link[ore:es]{ore::es()}}, such as \code{round}, may also be given.}
+\item{...}{Objects which can be coerced to mode \code{character}. These are
+pasted together and passed through \code{\link[ore:es]{ore::es()}} for expression
+substitution. Arguments to \code{\link[ore:es]{ore::es()}}, such as \code{round}, may also be
+given.}
 
 \item{class}{A character vector of classes to attach to the condition, or
 \code{NULL}. A class derived from the level of the message, such as
@@ -64,10 +65,10 @@ effects, and return \code{NULL}, invisibly.
 }
 \description{
 These functions report informative messages, warnings and errors, as
-alternatives to \code{\link[=message]{message()}}, \code{\link[=warning]{warning()}} and \code{\link[=stop]{stop()}}. \code{report()} reports a
-message immediately, while \code{flag()} stores it to be reported later. \code{assert()}
-reports a message only if an expression is not \code{TRUE}, and \code{ask()} asks the
-user a question.
+alternatives to \code{\link[=message]{message()}}, \code{\link[=warning]{warning()}} and \code{\link[=stop]{stop()}}. \code{report()} reports
+a message immediately, while \code{flag()} stores it to be reported later.
+\code{assert()} reports a message only if an expression is not \code{TRUE}, and
+\code{ask()} asks the user a question.
 }
 \details{
 Each message has a level, such as \code{Info} or \code{Warning}, which may be given as

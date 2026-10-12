@@ -1,7 +1,7 @@
 options(reportrStderrLevel=OL$Fatal, reportrBaseClasses=FALSE, reportrMessageFilterOut=NULL, reportrStackTraceLevel=OL$Error)
 setOutputLevel(OL$Info)
 
-# The callee describes what happened; it takes no "errorIfMissing"-style flag
+# The callee describes what happened
 findThing <- function (name)
 {
     if (name != "widget")

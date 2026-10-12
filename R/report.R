@@ -109,10 +109,10 @@ ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat 
 #' Report messages, warnings and errors
 #'
 #' These functions report informative messages, warnings and errors, as
-#' alternatives to [message()], [warning()] and [stop()]. `report()` reports a
-#' message immediately, while `flag()` stores it to be reported later. `assert()`
-#' reports a message only if an expression is not `TRUE`, and `ask()` asks the
-#' user a question.
+#' alternatives to [message()], [warning()] and [stop()]. `report()` reports
+#' a message immediately, while `flag()` stores it to be reported later.
+#' `assert()` reports a message only if an expression is not `TRUE`, and
+#' `ask()` asks the user a question.
 #'
 #' Each message has a level, such as `Info` or `Warning`, which may be given as
 #' `OL$Info`, as the bare name `Info`, or as the string `"Info"`; see [reportr]
@@ -180,9 +180,10 @@ ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat 
 #' question is filtered out.
 #'
 #' @param level The level of the message. See Details.
-#' @param ... Objects which can be coerced to mode `character`. These are pasted
-#'   together and passed through [ore::es()] for expression substitution.
-#'   Arguments to [ore::es()], such as `round`, may also be given.
+#' @param ... Objects which can be coerced to mode `character`. These are
+#'   pasted together and passed through [ore::es()] for expression
+#'   substitution. Arguments to [ore::es()], such as `round`, may also be
+#'   given.
 #' @param class A character vector of classes to attach to the condition, or
 #'   `NULL`. A class derived from the level of the message, such as
 #'   `"reportrWarning"`, is always attached in addition to these.
@@ -192,15 +193,15 @@ ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat 
 #'   the format for each output target?
 #' @param prefixFormat Deprecated. A value of `""` is equivalent to
 #'   `prefix = FALSE`, and any other value is ignored with a warning.
+#' @param expr For `assert()`, an expression which should evaluate to `TRUE`.
+#'   An expression which cannot be evaluated counts as a failure.
+#' @param envir For `assert()`, the environment in which to evaluate `expr` and
+#'   to substitute expressions into the message.
 #' @param default For `ask()`, the value to return if the question is not
 #'   asked.
 #' @param valid For `ask()`, a character vector of valid responses. If
 #'   necessary, the question will be asked repeatedly until the user gives a
 #'   suitable response. Matching is not case-sensitive.
-#' @param expr For `assert()`, an expression which should evaluate to `TRUE`.
-#'   An expression which cannot be evaluated counts as a failure.
-#' @param envir For `assert()`, the environment in which to evaluate `expr` and
-#'   to substitute expressions into the message.
 #'
 #' @return `ask()` returns the user's response as a character string, or the
 #'   value of `default`. The other functions are called for their side
