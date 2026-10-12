@@ -8,21 +8,34 @@ VERSION 2.0.0
   reported. The class vector always includes one derived from the level of the
   message, such as "reportrInfo", so existing code gains conditions without
   any changes. See ?reportrCondition.
-- The new signal() function, and its per-level variants signalDebug(),
-  signalVerbose(), signalInfo(), signalWarning() and signalError(), attach
-  further classes of the caller's choosing to a message.
+- The report(), flag() and assert() functions gain a "class" argument, which
+  attaches further classes of the caller's choosing to a message, and a "call"
+  argument giving the call to associate with the condition. Classed messages
+  are signalled even when the output level means that they will not be
+  reported.
 - The new reportAs() function changes the level at which particular classes of
-  condition are reported, so that the caller decides how serious a situation
-  is. Together these replace the common pattern of a function taking an
-  "errorIfMissing"-style logical argument to be told how to react to something
-  it has detected.
+  condition are reported, so that the caller can decide how serious a situation
+  is.
+- The new fallback() function raises an error which the caller may demote,
+  returning a value of the signalling function's choosing instead. Only errors
+  raised this way can be demoted, since others provide no value to continue
+  with.
 - withReportrHandlers() now also accepts named arguments mapping condition
   classes to levels or to handler functions, and reportrHandlers() installs the
   same translations for a whole session using globalCallingHandlers(), which
   requires R 4.0.0 or later. The package itself needs only R 3.5.0.
-- Messages can now be sent to files, connections and functions as well as, or
-  instead of, the terminal. See ?destinations. The new "%t" prefix escape
-  expands to the current time.
+- Conditions translated by withReportrHandlers() keep the classes of R's
+  original condition, which is also stored in their "original" element, so a
+  handler further out can still match them by class.
+- Messages can now be written to files, connections and functions as well as,
+  or instead of, the terminal, using setOutputTargets() with toTerminal(),
+  toFile() and toFunction(). Each output target may have its own level
+  threshold and prefix format. See ?targets.
+- The new "%t" prefix escape expands to the current time, formatted according
+  to the new "reportrTimeFormat" option.
+- The new "reportrBaseClasses" option, if TRUE, makes conditions at level
+  Warning inherit from "warning", and those at level Info and below from
+  "message", so that suppressWarnings() and suppressMessages() affect them.
 - The new level OL$Ignore, below OL$Debug, can be used with reportAs() to
   suppress a class of condition entirely.
 
@@ -46,6 +59,15 @@ BREAKING CHANGES
 - flag() signals its condition at the point where the message is flagged,
   rather than when it is eventually reported. A flagged message at level Error
   or above is therefore fatal at that point.
+- Flagged messages, including warnings consolidated by withReportrHandlers(),
+  are now written with the usual prefix format, rather than always with
+  "%L: ". With the default format they are therefore indented to show the
+  call depth at which they were flagged.
+- The "prefixFormat" argument to report(), ask() and assert() is deprecated,
+  since prefix formats now belong to output targets. The value "", which
+  suppresses the prefix, is still honoured, and is equivalent to the new
+  "prefix=FALSE"; any other value is ignored, with a warning the first time.
+- The package now requires R 3.5.0 or later.
 
 BUG FIXES
 
@@ -58,8 +80,13 @@ BUG FIXES
 - The environment used for expression substitution is now passed explicitly
   rather than being inferred from the call depth, so it remains correct
   regardless of how a message reaches the reporting code.
-- assert() now honours its "prefixFormat" argument, which it previously
-  accepted and ignored.
+- withReportrHandlers() now returns the value of its expression invisibly if
+  that value was invisible, so wrapping an expression no longer changes what
+  the console prints.
+- Stack traces for messages reported at top level no longer contain a
+  spurious "NA" entry.
+- The "%f" prefix escape no longer causes an error when a message is reported
+  at top level; it expands to an empty string instead.
 
 =================================================================================
 
