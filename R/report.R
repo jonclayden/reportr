@@ -68,8 +68,27 @@
 }
 
 # Simple wrappers, to facilitate mocking in the tests
-.interactive <- function() base::interactive()      # nocov
-.readline <- function(...) base::readline(...)      # nocov
+.interactive <- function() base::interactive()      # nocov start
+.readline <- function(...) base::readline(...)
+.stdinIsTerminal <- function() isatty(stdin())
+
+# Read a line from the process's standard input, which under Rscript is still
+# the terminal even though the session isn't interactive. The connection is
+# kept open, so that input typed ahead isn't lost between questions. Returns
+# character(0) at the end of input
+.readStdin <- function (prompt)
+{
+    cat(prompt)
+    flush(stdout())
+    if (is.null(.Workspace$stdin))
+        .Workspace$stdin <- file("stdin", open="r")
+    line <- readLines(.Workspace$stdin, n=1)
+
+    # Without an answer, nothing has ended the prompt's line
+    if (length(line) == 0)
+        cat("\n")
+    return (line)
+}                                                   # nocov end
 
 #' @rdname report
 #' @order 6
@@ -79,7 +98,17 @@ ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat 
     prefix <- .resolvePrefix(prefix, prefixFormat)
     outputLevel <- .outputLevel()
     message <- .buildMessage(..., .envir=parent.frame())
-    if (!.interactive() || outputLevel > OL$Question || !.shouldReport(message))
+
+    # Interactive sessions read through the R console, which may be a GUI.
+    # Otherwise, a script run from a terminal can still read from it directly
+    if (.interactive())
+        read <- .readline
+    else if (isTRUE(.resolveOption("reportrAskInScripts")) && .stdinIsTerminal())
+        read <- .readStdin
+    else
+        return (default)
+
+    if (outputLevel > OL$Question || !.shouldReport(message))
         return (default)
     else
     {
@@ -93,8 +122,10 @@ ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat 
             prefix <- ""
         repeat
         {
-            ans <- .readline(paste(prefix, message, " ", sep=""))
-            if (is.null(valid))
+            ans <- read(paste(prefix, message, " ", sep=""))
+            if (length(ans) == 0)
+                return (default)
+            else if (is.null(valid))
                 return (ans)
             else
             {
@@ -174,10 +205,13 @@ ask <- function (..., default = NULL, valid = NULL, prefix = TRUE, prefixFormat 
 #' reported immediately, so that they appear where they arise.
 #'
 #' @section Questions:
-#' `ask()` requests input from the user, using [readline()], at level
-#' `Question`. It returns the text entered by the user, or `default` if the
-#' session is not interactive, the output level is above `Question`, or the
-#' question is filtered out.
+#' `ask()` requests input from the user at level `Question`. In an interactive
+#' session it uses [readline()]. Otherwise, as when a script is run with
+#' `Rscript`, it reads directly from standard input, provided that this is a
+#' terminal and the `reportrAskInScripts` option is not `FALSE`. It returns the
+#' text entered by the user, or `default` if there is nobody to ask, the output
+#' level is above `Question`, the question is filtered out, or input ends
+#' before an answer is given.
 #'
 #' @param level The level of the message. See Details.
 #' @param ... Objects which can be coerced to mode `character`. These are

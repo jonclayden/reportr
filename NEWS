@@ -67,6 +67,10 @@ BREAKING CHANGES
   since prefix formats now belong to output targets. The value "", which
   suppresses the prefix, is still honoured, and is equivalent to the new
   "prefix=FALSE"; any other value is ignored, with a warning the first time.
+- ask() now asks its question in a non-interactive session, such as a script
+  run with Rscript, if standard input is a terminal, reading the answer from
+  there. Previously it always returned its default in such sessions. Setting
+  the new "reportrAskInScripts" option to FALSE restores the old behaviour.
 - The package now requires R 3.5.0 or later.
 
 BUG FIXES

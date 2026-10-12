@@ -55,6 +55,10 @@
 #' * `reportrBaseClasses`: Should reportr conditions also inherit from base R's
 #'   `"message"` and `"warning"` classes? The default is `FALSE`; see
 #'   [reportrCondition()].
+#' * `reportrAskInScripts`: Should [ask()] read answers directly from standard
+#'   input in a non-interactive session, such as a script run with `Rscript`,
+#'   if standard input is a terminal? The default is `TRUE`. If `FALSE`, the
+#'   default answer is always used in non-interactive sessions.
 #'
 #' @author Jon Clayden
 #' @aliases OL

@@ -69,6 +69,10 @@ is still fatal.
 \item \code{reportrBaseClasses}: Should reportr conditions also inherit from base R's
 \code{"message"} and \code{"warning"} classes? The default is \code{FALSE}; see
 \code{\link[=reportrCondition]{reportrCondition()}}.
+\item \code{reportrAskInScripts}: Should \code{\link[=ask]{ask()}} read answers directly from standard
+input in a non-interactive session, such as a script run with \code{Rscript},
+if standard input is a terminal? The default is \code{TRUE}. If \code{FALSE}, the
+default answer is always used in non-interactive sessions.
 }
 }
 

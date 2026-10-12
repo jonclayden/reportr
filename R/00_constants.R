@@ -8,6 +8,7 @@ OL <- list(Ignore=0L, Debug=1L, Verbose=2L, Info=3L, Warning=4L, Question=5L, Er
                   reportrStderrLevel=OL$Warning,
                   reportrStackTraceLevel=OL$Error,
                   reportrBaseClasses=FALSE,
+                  reportrAskInScripts=TRUE,
                   reportrMessageFilterIn=NULL,
                   reportrMessageFilterOut=NULL)
 

@@ -138,10 +138,13 @@ reported immediately, so that they appear where they arise.
 
 \section{Questions}{
 
-\code{ask()} requests input from the user, using \code{\link[=readline]{readline()}}, at level
-\code{Question}. It returns the text entered by the user, or \code{default} if the
-session is not interactive, the output level is above \code{Question}, or the
-question is filtered out.
+\code{ask()} requests input from the user at level \code{Question}. In an interactive
+session it uses \code{\link[=readline]{readline()}}. Otherwise, as when a script is run with
+\code{Rscript}, it reads directly from standard input, provided that this is a
+terminal and the \code{reportrAskInScripts} option is not \code{FALSE}. It returns the
+text entered by the user, or \code{default} if there is nobody to ask, the output
+level is above \code{Question}, the question is filtered out, or input ends
+before an answer is given.
 }
 
 \examples{
