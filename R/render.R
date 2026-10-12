@@ -320,7 +320,7 @@ getOutputTargets <- function ()
 
     # Drop everything up to and including the innermost handler-establishing
     # call, together with the frames it uses to install the handlers
-    handlerFunLoc <- which(callStrings %~% "^(withReportrHandlers|reportAs)\\(")
+    handlerFunLoc <- which(callStrings %~% "^([\\w.]+:::?)?(withReportrHandlers|reportAs)\\(")
     if (length(handlerFunLoc) > 0)
     {
         lastFrame <- handlerFunLoc[length(handlerFunLoc)]
@@ -331,7 +331,7 @@ getOutputTargets <- function ()
 
     # Everything from the function which raised the message onwards is dropped,
     # including R's own machinery for warnings and errors raised in C code
-    raisingFunLoc <- which(callStrings %~% "^\\.?(ask|assert|fallback|flag|report|reportFlags|signal|signalSimpleWarning|handleSimpleError|message|warning|stop)\\(")
+    raisingFunLoc <- which(callStrings %~% "^([\\w.]+:::?)?\\.?(ask|assert|fallback|flag|report|reportFlags|signal|signalSimpleWarning|handleSimpleError|message|warning|stop)\\(")
     if (length(raisingFunLoc) > 0)
         callStrings <- callStrings[-(raisingFunLoc[1]:length(callStrings))]
 
@@ -357,7 +357,7 @@ getOutputTargets <- function ()
         if (prefix %~% "\\%f")
         {
             # There is no function to name at top level
-            name <- if (length(stack) == 0) "" else ore.subst("^([\\w.]+)\\(.+$","\\1",stack[length(stack)])
+            name <- if (length(stack) == 0) "" else ore.subst("^([\\w.]+:::?)?([\\w.]+)\\(.+$","\\2",stack[length(stack)])
             prefix <- ore.subst(ore("%f",syntax="fixed"), name, prefix, all=TRUE)
         }
         if (prefix %~% "\\%l")

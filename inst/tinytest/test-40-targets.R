@@ -196,3 +196,17 @@ expect_true(grepl("^\\d{4}$", reportr:::.buildPrefix(OL$Info,"%t")))
 options(reportrTimeFormat=NULL)
 
 setOutputLevel(OL$Info)
+
+# Namespace-qualified calls to reportr functions don't add to the depth, and
+# qualified function names are reduced to the function name by "%f"
+expect_equal(reportr:::.getCallStack(list(quote(f()), quote(reportr::report(Info,"x")), quote(.signal(3L,"x")))), "f()")
+expect_equal(reportr:::.getCallStack(list(quote(reportr::reportAs(f())), quote(withCallingHandlers(expr)), quote(f()), quote(report(Info,"x")))), "f()")
+expect_equal(reportr:::.getCallStack(list(quote(f()), quote(base::stop("x")))), "f()")
+expect_equal(reportr:::.buildPrefix(OL$Info, "%d%f", calls=list(quote(mypkg::g(1)), quote(reportr:::report(Info,"x")))), "* g")
+
+captured <- NULL
+old <- setOutputTargets(toFunction(function (text, level, condition) captured <<- c(captured, text), prefix="%d%f %L: "))
+f <- function () reportr::report(Info, "qualified")
+reportr::reportAs(f())
+setOutputTargets(old)
+expect_equal(captured, "* f INFO: qualified\n")

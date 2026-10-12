@@ -91,6 +91,9 @@ BUG FIXES
   spurious "NA" entry.
 - The "%f" prefix escape no longer causes an error when a message is reported
   at top level; it expands to an empty string instead.
+- Namespace-qualified calls, such as reportr::report(), no longer add spurious
+  depth to the "%d" prefix escape or to stack traces, and "%f" now gives just
+  the function name for a qualified call.
 
 =================================================================================
 
